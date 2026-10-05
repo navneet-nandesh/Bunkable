@@ -61,18 +61,31 @@ app.post('/api/attendance', async (req, res) => {
         } catch(e) {}
 
         // 5. Navigate to the Attendance page safely
-        const attendanceUrl = await page.evaluate(() => {
-            // Search all anchor tags for 'Attendance'
-            const links = Array.from(document.querySelectorAll('a'));
-            const atndLink = links.find(a => a.innerText.trim().toLowerCase() === 'attendance' || a.innerText.includes('Attendance'));
-            return atndLink ? atndLink.href : null;
-        });
-
-        if (attendanceUrl) {
-            await page.goto(attendanceUrl, { waitUntil: 'networkidle2' });
-        } else {
-            throw new Error('Could not find the Attendance section on the portal dashboard.');
-        }
+        // Click the li tab and explicitly wait for the page to navigate!
+        await Promise.all([
+            page.waitForNavigation({ waitUntil: 'networkidle2' }),
+            page.evaluate(() => {
+                const tabs = document.querySelectorAll('li');
+                let found = false;
+                for (const tab of tabs) {
+                    if (tab.innerText && tab.innerText.includes('Attendance')) {
+                        tab.click();
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // Fallback: try clicking any element with 'Attendance' text
+                    const allEls = document.querySelectorAll('*');
+                    for (const el of allEls) {
+                        if (el.innerText === 'Statements of Attendance' || el.innerText === 'Attendance') {
+                            el.click();
+                            break;
+                        }
+                    }
+                }
+            })
+        ]);
         // Wait for the semester list to load
         await page.waitForSelector('.atnd_head', { timeout: 10000 });
         
