@@ -9,15 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const subjectsGrid = document.getElementById('subjects-grid');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // Mock Data from a hypothetical portal scraper
-    const mockSubjectsData = [
-        { name: 'Data Structures and Algorithms', attended: 35, total: 40 },
-        { name: 'Computer Networks', attended: 22, total: 35 },
-        { name: 'Operating Systems', attended: 30, total: 32 },
-        { name: 'Database Management Systems', attended: 25, total: 40 },
-        { name: 'Machine Learning', attended: 10, total: 20 },
-        { name: 'Software Engineering', attended: 28, total: 30 }
-    ];
+    // Global state for attendance data
+    const subjectsData = [];
 
     // Event Listeners
     loginForm.addEventListener('submit', handleLogin);
@@ -49,38 +42,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             
             if (response.ok && result.success) {
-                // If successful, replace the mock data with the real scraped data
-                mockSubjectsData.length = 0;
-                mockSubjectsData.push(...result.data);
+                // Populate data
+                subjectsData.length = 0;
+                subjectsData.push(...result.data);
                 if (result.name) {
                     document.getElementById('user-name').innerText = result.name;
                 }
+                
+                // Transition pages
+                loginSection.classList.remove('active');
+                loginSection.classList.add('hidden');
+                
+                dashboardSection.classList.remove('hidden');
+                // small delay to allow display:block to apply before animation
+                setTimeout(() => {
+                    dashboardSection.classList.add('active');
+                    updateDashboard();
+                }, 50);
+                
             } else {
-                console.warn("Backend returned an error, falling back to mock data:", result.error);
-                alert("Backend error: " + (result.error || "Unknown error") + "\n\nFalling back to mock data.");
+                console.warn("Backend error:", result.error);
+                alert("Login Failed: " + (result.error || "Invalid credentials or portal error."));
             }
         } catch (error) {
-            console.warn("Backend server not running or unreachable. Falling back to mock data.");
-            // If the server isn't running yet, we just silently fall back to mock data
-        }
-
-        // Delay slightly for smooth transition
-        setTimeout(() => {
+            console.error("Fetch error:", error);
+            alert("Connection Error: Could not reach the backend server.");
+        } finally {
             loginBtnText.classList.remove('hidden');
             spinner.classList.add('hidden');
-            
-            // Transition pages
-            loginSection.classList.remove('active');
-            loginSection.classList.add('hidden');
-            
-            dashboardSection.classList.remove('hidden');
-            // small delay to allow display:block to apply before animation
-            setTimeout(() => {
-                dashboardSection.classList.add('active');
-                updateDashboard();
-            }, 50);
-            
-        }, 500);
+        }
     }
 
     function handleLogout() {
@@ -136,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let overallAttended = 0;
         let overallTotal = 0;
 
-        mockSubjectsData.forEach((subject, index) => {
+        subjectsData.forEach((subject, index) => {
             overallAttended += subject.attended;
             overallTotal += subject.total;
 
