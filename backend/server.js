@@ -60,17 +60,19 @@ app.post('/api/attendance', async (req, res) => {
             studentName = nameText.split(',')[0].trim();
         } catch(e) {}
 
-        // 5. Click the Attendance tab in the sidebar
-        await page.evaluate(() => {
-            const tabs = document.querySelectorAll('li');
-            for (const tab of tabs) {
-                if (tab.innerText.includes('Attendance')) {
-                    tab.click();
-                    break;
-                }
-            }
+        // 5. Navigate to the Attendance page safely
+        const attendanceUrl = await page.evaluate(() => {
+            // Search all anchor tags for 'Attendance'
+            const links = Array.from(document.querySelectorAll('a'));
+            const atndLink = links.find(a => a.innerText.trim().toLowerCase() === 'attendance' || a.innerText.includes('Attendance'));
+            return atndLink ? atndLink.href : null;
         });
-        
+
+        if (attendanceUrl) {
+            await page.goto(attendanceUrl, { waitUntil: 'networkidle2' });
+        } else {
+            throw new Error('Could not find the Attendance section on the portal dashboard.');
+        }
         // Wait for the semester list to load
         await page.waitForSelector('.atnd_head', { timeout: 10000 });
         
