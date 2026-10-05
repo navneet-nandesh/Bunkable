@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 console.warn("Backend returned an error, falling back to mock data:", result.error);
-                alert("Backend error (Check console). Falling back to mock data for demonstration.");
+                alert("Backend error: " + (result.error || "Unknown error") + "\n\nFalling back to mock data.");
             }
         } catch (error) {
             console.warn("Backend server not running or unreachable. Falling back to mock data.");

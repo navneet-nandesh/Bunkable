@@ -101,7 +101,7 @@ app.post('/api/attendance', async (req, res) => {
 
     } catch (error) {
         console.error('Scraping error:', error);
-        res.status(500).json({ error: 'Failed to fetch attendance data from the portal. Verify selectors and URL.' });
+        res.status(500).json({ error: error.message || error.toString() });
     } finally {
         if (browser) {
             await browser.close();
