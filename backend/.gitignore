@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.log
+dashboard.html
+attendance.html
+attendance_table.html
+temp_html.txt

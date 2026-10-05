@@ -1,0 +1,274 @@
+<!DOCTYPE html><html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>WELCOME TO FISAT CAMPUS AUTOMATION SYSTEM</title>
+        <link href="https://intranet.fisat.ac.in/asset/images/fisatico.png" rel="shortcut icon">
+        <link href="https://intranet.fisat.ac.in/asset/css/intellinet.css?v=3" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/staff/styleblue.css" type="text/css" rel="stylesheet">
+         <link href="https://intranet.fisat.ac.in/asset/css/jquery.dataTables.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/notesearch.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/redmond/jquery-ui-1.8.21.custom.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/tipTip.css" type="text/css" rel="stylesheet">    
+        <link href="https://intranet.fisat.ac.in/asset/css/plcstlyle.css" type="text/css" rel="stylesheet">
+        
+            <script language="javascript" src="asset/js/jquery-1.7.2.min.js"></script>
+    <script language="javascript" src="asset/js/jquery-ui-1.8.21.custom.min.js"></script>
+
+<!--        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery-1.8.3.min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery-ui-1.9.2.custom.min.js"></script>-->
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/slimScroll.min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.vticker-min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.dataTables.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/json.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/home.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.tipTip.minified.js"></script>
+        <link rel="stylesheet" href="https://intranet.fisat.ac.in/asset/plugins/ialert/ialert.css">
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/plugins/ialert/ialert.js"></script>
+    </head>
+    <body oncontextmenu="return false;">
+	
+        <div id="loading"><img src="https://intranet.fisat.ac.in/asset/images/loading1.gif"><br> Loading</div>
+        <div id="head_panel">
+            <div class="head_center">
+                <div id="site_name">
+<!--                    <div class="logo"></div>-->
+                    <!--                    <div class="main_name"></div>-->
+                    <!-- <div class="fo">FISAT<span> Online</span></div>-->
+                    <div class="fo">FISAT <span>CAMPUS AUTOMATION SYSTEM</span></div>
+                    
+                    <div class="sub_name">Federal institute of science and technology (FISAT)®</div>
+                </div>
+                
+<!--               site name ends here -->
+                    <div id="lgin_info">
+<!--                        <div id="logout_btn"></div>-->
+<a href="https://intranet.fisat.ac.in/index.php/ecampus/logout" style="text-decoration: none;">
+                <input type="button" name="logout" id="logout" value="Logout">
+                </a>
+                        <br class="clr">
+                        <div class="log_data">NAVNEET NANDESH , 685/25                            <br>
+                            Computer Science and Engineering (KTU)                        </div>
+                        </div>
+                    <br class="clr">
+            </div>
+            
+        </div>
+        <!--  top header ends here -->
+        <div id="main_panel">
+            <div class="main_center">
+                <!--   menu center-->
+                <div id="menu_left_colum">
+                    <div class="menu_panel">
+<!--                        <div id="menu_head">Menu</div>-->
+                        <div id="menu_content">
+                            <ul>
+                                <li class="active" page="https://intranet.fisat.ac.in/"><a href="https://intranet.fisat.ac.in/">Home</a></li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/profile">Profile</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/attendance">Attendance</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/absence">Absence Details</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/sessional">Sessional Score</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/exam">Exam Results</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/semesterregistration" id="semRegistrationTab">Semester Registration</li>
+<!--
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/semesterregistrationstatus" id="semRegistrationTab">Semester Registration</li>
+-->
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/feepayment" id="feepaymenttab" style="background-color:#b3ffec;">Fee Payment</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/otherfeepayment" id="feepaymentothertab" style="background-color:#b3ffec;">Other Payments</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/offlinefeepayment" id="feepaymentofflinetab" style="background-color:#b3ffec;display:none">Payment Details</li>
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/feeTransaction">Fee Transactions</li>
+
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/hosteladmission" id="hostelAdmission">Hostel Admission</li>
+                                
+                             
+			
+				
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementnews" style=" pointer-events:none; opacity:0.6;" id="plcnewstab">Placement News</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementban" id="plcprofileban">Placement Ban</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementstatus" id="plcstatustab">Placements</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/notes" id="search_notes">Staff Notes</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/collegenotice">College Notice</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/assignments" style="display:none">Assignments</li>
+                                <li style="display:none;" page="https://intranet.fisat.ac.in/index.php/ecampus/syllabus">Syllabus</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/security">Change Password</li>
+                                 <!--<li><a href="http://inet.fisat.edu/fisat/logonchecknew.asp?login_username=685/25" target="_blank" style="text-decoration: none;">Library</a></li>-->
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/studentgrievance">Grievances</li>
+                      </ul>
+                            
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+                               
+            <!-- ends menu center left col -->
+            <div id="right_col">
+                  
+                
+                <!-- middle panel-->
+                    <div class="middle_panel">
+                              <!--box1-->
+                              <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 520px;"><div id="center_scroll" style="overflow: hidden; width: auto; height: 520px;">
+                     <div class="center_box">                                    
+                                        <div class="c_head">Forms</div>
+                                        <div class="c_content" id="plc_area">
+                                          <a class="menu_download" href="https://intranet.fisat.ac.in/asset/downloadfiles/StudentGrievanceSubmissionForm.pdf" download="StudentGrievanceSubmissionForm.pdf">Click here to download Grievance Submission Form </a>
+                                          </div>
+                                          </div>                          
+                                   <div class="center_box">                                    
+                                        <div class="c_head">Placement Activities</div>
+                                        <div class="c_content" id="plc_area">
+                                            <div id="ialert_frame"><div id="imodel"></div><div id="ialert"><div class="ialert_content"><div id="iicon"><div class="iinfo"></div></div><div id="imessage"></div><br class="iclr"></div> <div class="icontrol" id="icontrol">undefined</div></div></div>
+                                            
+                                            
+                                                                      <div class="atnd_info_box no_data">Information Not Available</div> 
+                                     
+                                            
+                                        </div>
+                                        <div class="navigate">
+                                                <div title="View Activity history" id="plc_history">History</div>
+                                             
+                                        </div>
+                                        <br class="clr">
+                                </div>  
+                                  <div class="hrline" style="width:570px;"></div>
+                                  
+                                <div class="center_box">                                    
+                                        <div class="c_head">Latest Notifications</div>
+                                        <div class="c_content">
+                                                                    <div class="atnd_info_box no_data">Information Not Available</div> 
+                                     
+                                        </div>
+                                        <div class="navigate">
+                                                    <div class="next"></div>
+                                                    <div class="prev"></div>
+                                        </div>
+                                        <br class="clr">
+                                </div>  
+                                <!--box1 ends -->
+                                <div class="hrline" style="width:570px;"></div>
+                              
+                                <!--box2-->
+                                <div class="center_box" style="height: auto;">
+                                        <div class="c_head">Staff notes</div>
+                                        <div class="c_content" style="height:auto;">
+                                                <!--   note1-->
+                                                                                            <div class="atnd_info_box no_data">Information Not Available</div> 
+                                     
+                                     
+                                        </div>
+                                        <div class="navigate">
+                                            <div title="Download Staff Notes" id="prvious_notes" page="https://intranet.fisat.ac.in/index.php/ecampus/notes">View More</div>
+                                        
+                                        </div>
+                                        <div class="clr"></div>
+                             
+                                         <div id="prev_note_box">
+
+                                                <h3></h3>
+                                         </div>
+                                <!--box2 ends -->
+                                </div>
+                                <br class="clr">
+<!--                                           <div class="hrline"></div>-->
+                              </div><div class="slimScrollBar ui-draggable" style="background: rgb(160, 160, 160); width: 7px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 488.439px;"></div><div class="slimScrollRail" style="width: 7px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div></div>
+                     </div>
+            <div class="right_panel">
+                    
+                          <!--   news and updates-->
+                        
+                          <div class="right_box" style="height: 275px;" "="">
+                            <div class="r_head">News &amp; Updates</div>
+                            <div class="r_content" style="height: 220px; padding-top: 10px;">
+                                <div id="vertical_news" style="overflow: hidden; position: relative; height: 0px;">
+                               <ul style="position: absolute; margin: 0px; padding: 0px;"> 
+                               
+                                               
+                                  <!--  Information Note Available                                -->
+                               </ul>
+                                </div>
+                            </div>
+                        </div>
+                       <!--    news and updates ends -->
+             <div class="hrline" style="border-color:#95bbe2;"></div>
+                        <!--    academic calendar-->
+                       <div class="right_box">
+                            <div class="r_head">Academic Calendar</div>
+                            <div class="r_content" align="center" style="text-align: center;">
+                                <div id="acc_cal" style="background:transparent;" class="hasDatepicker"><div class="ui-datepicker-inline ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" style="display: block;"><div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all"><a class="ui-datepicker-prev ui-corner-all" onclick="DP_jQuery_1791206915820.datepicker._adjustDate('#acc_cal', -1, 'M');" title="Prev"><span class="ui-icon ui-icon-circle-triangle-w">Prev</span></a><a class="ui-datepicker-next ui-corner-all" onclick="DP_jQuery_1791206915820.datepicker._adjustDate('#acc_cal', +1, 'M');" title="Next"><span class="ui-icon ui-icon-circle-triangle-e">Next</span></a><div class="ui-datepicker-title"><span class="ui-datepicker-month">October</span>&nbsp;<span class="ui-datepicker-year">2026</span></div></div><table class="ui-datepicker-calendar"><thead><tr><th class="ui-datepicker-week-end"><span title="Sunday">Su</span></th><th><span title="Monday">Mo</span></th><th><span title="Tuesday">Tu</span></th><th><span title="Wednesday">We</span></th><th><span title="Thursday">Th</span></th><th><span title="Friday">Fr</span></th><th class="ui-datepicker-week-end"><span title="Saturday">Sa</span></th></tr></thead><tbody><tr><td class=" ui-datepicker-week-end ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">1</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">2</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">3</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">4</a></td><td class=" ui-datepicker-days-cell-over  ui-datepicker-current-day ui-datepicker-today" onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default ui-state-highlight ui-state-active ui-state-hover" href="#">5</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">6</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">7</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">8</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">9</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">10</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">11</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">12</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">13</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">14</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">15</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">16</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">17</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">18</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">19</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">20</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">21</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">22</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">23</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">24</a></td></tr><tr><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">25</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">26</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">27</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">28</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">29</a></td><td class=" " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">30</a></td><td class=" ui-datepicker-week-end " onclick="DP_jQuery_1791206915820.datepicker._selectDay('#acc_cal',9,2026, this);return false;"><a class="ui-state-default" href="#">31</a></td></tr></tbody></table></div></div>
+                            </div>
+                        </div>
+                    <!--academic calendar ends-->
+
+                   </div>
+          </div>
+<!--               right panel complete     -->
+            
+<div class="clr"></div>
+    </div>
+</div>
+
+
+<!--        main ends here-->
+        <div id="bottom_panel">
+            <div class="bottom_center">
+                <div class="site_name"><a href="http://www.fisat.ac.in" target="_new">Fisat.ac.in</a></div>
+                <div class="site_feature">
+                    <ul>
+                        <li>Statements of Attendance</li>
+                        <li>Statements of Assignments</li>
+                        <li>Statements of Marks</li>
+                        <li>Discussion Groups</li>
+                        <li>Staff Notes</li>
+                        <li>Messaging</li>
+                        
+                    </ul>
+                </div>
+                <div class="clr"></div>
+            </div>
+        </div>
+<!--        bottom ends here-->
+<!--Extras-->
+<div id="reply">notification</div>
+<div id="calendar_events" title="Academic Calendar"></div>
+
+
+<div class="iwindow ui-draggable" id="plc_history_box">
+    
+    <h6>Activity History <span class="iclose" id="plc_history_close">[close]</span></h6>
+    <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 230px;"><div class="icontent_box" style="overflow: hidden; width: auto; height: 230px;">
+        <table class="table">
+            <thead>
+                <tr><th>Activity Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Registration Date</th>
+            </tr></thead>
+            <tbody id="plc_history_body">
+                
+            </tbody>
+
+        </table>
+    </div><div class="slimScrollBar ui-draggable" style="background: rgb(175, 161, 21); width: 7px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px;"></div><div class="slimScrollRail" style="width: 7px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div></div>
+    
+</div>
+<div style="display:none;position: fixed; top:20%; left:20%;  border:1px solid #0097c8; background-color:#0097c8; border-radius:10px; width:800px;" id="feeResponseDialogBox">
+    <div style="margin: 10px ; border:1px solid #F0F0E0; background-color:white">
+      <div style="width:100%"><div style="width:98%; float:left; font-size: medium;" align="center" id="FeeResponseHead">Transaction Details</div><div style="width:2%;float:left;" align="right"><img src="https://intranet.fisat.ac.in/asset/images/del.png" style="cursor:pointer;width:15px; height:15px;" id="FeeResponseCloseImage"></div></div>
+<br>
+<fieldset style="max-height:400px;over-flow:auto;">
+    
+  <div id="feeResponseListDiv"></div>	  
+	    
+</fieldset>
+   </div>
+   
+</div>
+
+    
+    
+
+<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div></body></html>

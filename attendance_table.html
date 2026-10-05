@@ -1,0 +1,313 @@
+<!DOCTYPE html><html><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>WELCOME TO FISAT CAMPUS AUTOMATION SYSTEM</title>
+        <link href="https://intranet.fisat.ac.in/asset/images/fisatico.png" rel="shortcut icon">
+        <link href="https://intranet.fisat.ac.in/asset/css/intellinet.css?v=3" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/staff/styleblue.css" type="text/css" rel="stylesheet">
+         <link href="https://intranet.fisat.ac.in/asset/css/jquery.dataTables.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/notesearch.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/redmond/jquery-ui-1.8.21.custom.css" type="text/css" rel="stylesheet">
+        <link href="https://intranet.fisat.ac.in/asset/css/tipTip.css" type="text/css" rel="stylesheet">    
+        <link href="https://intranet.fisat.ac.in/asset/css/plcstlyle.css" type="text/css" rel="stylesheet">
+        
+            <script language="javascript" src="asset/js/jquery-1.7.2.min.js"></script>
+    <script language="javascript" src="asset/js/jquery-ui-1.8.21.custom.min.js"></script>
+
+<!--        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery-1.8.3.min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery-ui-1.9.2.custom.min.js"></script>-->
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/slimScroll.min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.vticker-min.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.dataTables.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/json.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/home.js"></script>
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/js/jquery.tipTip.minified.js"></script>
+        <link rel="stylesheet" href="https://intranet.fisat.ac.in/asset/plugins/ialert/ialert.css">
+        <script language="javascript" src="https://intranet.fisat.ac.in/asset/plugins/ialert/ialert.js"></script>
+    </head>
+    <body oncontextmenu="return false;">
+	
+        <div id="loading" style="display: none;"><img src="https://intranet.fisat.ac.in/asset/images/loading1.gif"><br> Loading</div>
+        <div id="head_panel">
+            <div class="head_center">
+                <div id="site_name">
+<!--                    <div class="logo"></div>-->
+                    <!--                    <div class="main_name"></div>-->
+                    <!-- <div class="fo">FISAT<span> Online</span></div>-->
+                    <div class="fo">FISAT <span>CAMPUS AUTOMATION SYSTEM</span></div>
+                    
+                    <div class="sub_name">Federal institute of science and technology (FISAT)®</div>
+                </div>
+                
+<!--               site name ends here -->
+                    <div id="lgin_info">
+<!--                        <div id="logout_btn"></div>-->
+<a href="https://intranet.fisat.ac.in/index.php/ecampus/logout" style="text-decoration: none;">
+                <input type="button" name="logout" id="logout" value="Logout">
+                </a>
+                        <br class="clr">
+                        <div class="log_data">NAVNEET NANDESH , 685/25                            <br>
+                            Computer Science and Engineering (KTU)                        </div>
+                        </div>
+                    <br class="clr">
+            </div>
+            
+        </div>
+        <!--  top header ends here -->
+        <div id="main_panel">
+            <div class="main_center">
+                <!--   menu center-->
+                <div id="menu_left_colum">
+                    <div class="menu_panel">
+<!--                        <div id="menu_head">Menu</div>-->
+                        <div id="menu_content">
+                            <ul>
+                                <li class="" page="https://intranet.fisat.ac.in/"><a href="https://intranet.fisat.ac.in/">Home</a></li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/profile">Profile</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/attendance" class="active">Attendance</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/absence">Absence Details</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/sessional">Sessional Score</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/exam">Exam Results</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/semesterregistration" id="semRegistrationTab">Semester Registration</li>
+<!--
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/semesterregistrationstatus" id="semRegistrationTab">Semester Registration</li>
+-->
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/feepayment" id="feepaymenttab" style="background-color:#b3ffec;">Fee Payment</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/otherfeepayment" id="feepaymentothertab" style="background-color:#b3ffec;">Other Payments</li>
+
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/offlinefeepayment" id="feepaymentofflinetab" style="background-color:#b3ffec;display:none">Payment Details</li>
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/feeTransaction">Fee Transactions</li>
+
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/hosteladmission" id="hostelAdmission">Hostel Admission</li>
+                                
+                             
+			
+				
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementnews" style=" pointer-events:none; opacity:0.6;" id="plcnewstab">Placement News</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementban" id="plcprofileban">Placement Ban</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/placementstatus" id="plcstatustab">Placements</li>
+				<li page="https://intranet.fisat.ac.in/index.php/ecampus/notes" id="search_notes">Staff Notes</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/collegenotice">College Notice</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/assignments" style="display:none">Assignments</li>
+                                <li style="display:none;" page="https://intranet.fisat.ac.in/index.php/ecampus/syllabus">Syllabus</li>
+                                <li page="https://intranet.fisat.ac.in/index.php/ecampus/security">Change Password</li>
+                                 <!--<li><a href="http://inet.fisat.edu/fisat/logonchecknew.asp?login_username=685/25" target="_blank" style="text-decoration: none;">Library</a></li>-->
+<li page="https://intranet.fisat.ac.in/index.php/ecampus/studentgrievance">Grievances</li>
+                      </ul>
+                            
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+                               
+            <!-- ends menu center left col -->
+            <div id="right_col"><div id="attandance">
+    <div class="data_box">
+        <div class="d_head" style="padding-left:30px; background:#95bbe2 url('https://intranet.fisat.ac.in/asset/images/attendance.png') left center no-repeat;">Attendance</div>
+        <div class="c_content">
+                        <div class="atnd_head selected_head" sem="1" bid="3410">S3CS25C - SEMESTER 3 </div>
+            <div class="atnd_info_box" id="sem1" style="display: block;"><div class="consolidation">
+        <table class="table">
+        <thead>
+            <tr><th>From</th>
+            <th>To</th>
+            <th>Total Days</th>
+            <th>Attended</th>
+            <th>Percentage</th>
+        </tr></thead>
+        <tbody>
+            <tr class="align_center">
+                
+                 
+                <td>2026-07-01</td>
+                <td>2026-10-01</td>
+                <td>300</td>
+                <td>284.00</td>
+                <td>94.67%</td>
+                
+            </tr>
+        </tbody>
+    </table>
+             <div class="extra_heading">Subject Wise Listing</div>
+    
+    <table class="table">
+        <thead>
+            <tr><th>Subject</th>
+            <th>Total Periods</th>
+            <th>Presents</th>
+              <th>Percentage</th>
+            
+        </tr></thead>
+        <tbody>
+                       <tr>
+                <td style="text-transform:uppercase;">GAMAT301 Mathematics for Information Science-3</td>
+                <td class="align_center">42</td>
+                <td class="align_center">38</td>
+                <td class="align_center">90.48%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">PCCST302 Theory of Computation</td>
+                <td class="align_center">40</td>
+                <td class="align_center">39</td>
+                <td class="align_center">97.50%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">PCCST303 Data Structures and Algorithms</td>
+                <td class="align_center">49</td>
+                <td class="align_center">45</td>
+                <td class="align_center">91.84%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">PBCST304 Object Oriented Programming</td>
+                <td class="align_center">47</td>
+                <td class="align_center">46</td>
+                <td class="align_center">97.87%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">GAEST305 Digital Electronics &amp; Logic Design</td>
+                <td class="align_center">45</td>
+                <td class="align_center">43</td>
+                <td class="align_center">95.56%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">UCHUT346 Economics for Engineers</td>
+                <td class="align_center">21</td>
+                <td class="align_center">20</td>
+                <td class="align_center">95.24%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">PCCSL307 Data Structures Lab</td>
+                <td class="align_center">27</td>
+                <td class="align_center">24</td>
+                <td class="align_center">88.89%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">PCCSL308 Digital Lab</td>
+                <td class="align_center">29</td>
+                <td class="align_center">29</td>
+                <td class="align_center">100.00%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">MNAET309 Transducers And Instrumentation</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">MNECT309 Electronic Circuit and Linear ICs</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0%</td>
+                
+               
+            </tr>
+                        <tr>
+                <td style="text-transform:uppercase;">MNEET319 Introduction to Power System</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0</td>
+                <td class="align_center">0%</td>
+                
+               
+            </tr>
+                  
+        </tbody>
+    </table>
+     </div></div>
+                        <div class="atnd_head" sem="2" bid="3409">S2CS25C - SEMESTER 2 </div>
+            <div class="atnd_info_box" id="sem2">Attendance here</div>
+                        <div class="atnd_head" sem="3" bid="3408">S1CS25C - SEMESTER 1 </div>
+            <div class="atnd_info_box" id="sem3">Attendance here</div>
+             
+        </div>
+    </div>
+    
+</div></div>
+<!--               right panel complete     -->
+            
+<div class="clr"></div>
+    </div>
+</div>
+
+
+<!--        main ends here-->
+        <div id="bottom_panel">
+            <div class="bottom_center">
+                <div class="site_name"><a href="http://www.fisat.ac.in" target="_new">Fisat.ac.in</a></div>
+                <div class="site_feature">
+                    <ul>
+                        <li>Statements of Attendance</li>
+                        <li>Statements of Assignments</li>
+                        <li>Statements of Marks</li>
+                        <li>Discussion Groups</li>
+                        <li>Staff Notes</li>
+                        <li>Messaging</li>
+                        
+                    </ul>
+                </div>
+                <div class="clr"></div>
+            </div>
+        </div>
+<!--        bottom ends here-->
+<!--Extras-->
+<div id="reply">notification</div>
+<div id="calendar_events" title="Academic Calendar"></div>
+
+
+<div class="iwindow ui-draggable" id="plc_history_box">
+    
+    <h6>Activity History <span class="iclose" id="plc_history_close">[close]</span></h6>
+    <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 230px;"><div class="icontent_box" style="overflow: hidden; width: auto; height: 230px;">
+        <table class="table">
+            <thead>
+                <tr><th>Activity Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Registration Date</th>
+            </tr></thead>
+            <tbody id="plc_history_body">
+                
+            </tbody>
+
+        </table>
+    </div><div class="slimScrollBar ui-draggable" style="background: rgb(175, 161, 21); width: 7px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px;"></div><div class="slimScrollRail" style="width: 7px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div></div>
+    
+</div>
+<div style="display:none;position: fixed; top:20%; left:20%;  border:1px solid #0097c8; background-color:#0097c8; border-radius:10px; width:800px;" id="feeResponseDialogBox">
+    <div style="margin: 10px ; border:1px solid #F0F0E0; background-color:white">
+      <div style="width:100%"><div style="width:98%; float:left; font-size: medium;" align="center" id="FeeResponseHead">Transaction Details</div><div style="width:2%;float:left;" align="right"><img src="https://intranet.fisat.ac.in/asset/images/del.png" style="cursor:pointer;width:15px; height:15px;" id="FeeResponseCloseImage"></div></div>
+<br>
+<fieldset style="max-height:400px;over-flow:auto;">
+    
+  <div id="feeResponseListDiv"></div>	  
+	    
+</fieldset>
+   </div>
+   
+</div>
+
+    
+    
+
+<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div></body></html>

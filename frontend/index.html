@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bunkable | College Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="container">
+        <!-- Login Section -->
+        <section id="login-section" class="glass-panel active">
+            <div class="logo" style="display: flex; justify-content: center; margin-bottom: 2rem;">
+                <img src="logo.png" alt="Bunkable Logo" style="max-width: 100%; height: auto; max-height: 120px;">
+            </div>
+
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="student-id">Student ID</label>
+                    <input type="text" id="student-id" placeholder="e.g. 2021CS001" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Portal Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary" id="login-btn">
+                    <span class="btn-text">Connect to Portal</span>
+                    <div class="spinner hidden"></div>
+                </button>
+            </form>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="glass-panel hidden">
+            <header class="dashboard-header">
+                <div>
+                    <h2>Welcome back, <span id="user-name">Student</span>!</h2>
+                    <p class="subtitle">Here is your live attendance analysis.</p>
+                </div>
+                <div class="target-controls">
+                    <label for="target-attendance">Target Attendance %</label>
+                    <div class="target-input-wrapper">
+                        <input type="number" id="target-attendance" value="75" min="50" max="100">
+                        <span class="percent-symbol">%</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <h3>Overall Attendance</h3>
+                    <div class="stat-value" id="overall-percentage">0%</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Classes</h3>
+                    <div class="stat-value" id="overall-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Classes Attended</h3>
+                    <div class="stat-value" id="overall-attended">0</div>
+                </div>
+            </div>
+
+            <div class="subjects-grid" id="subjects-grid">
+                <!-- Subject cards will be injected here via JS -->
+            </div>
+
+            <button id="logout-btn" class="btn-secondary">Log Out</button>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

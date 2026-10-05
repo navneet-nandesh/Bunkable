@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+         
+         <title>WELCOME TO FISAT CAMPUS AUTOMATION SYSTEM</title>
+         <link href="https://intranet.fisat.ac.in/asset/images/fisatico.png" rel="shortcut icon">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link href="https://intranet.fisat.ac.in/asset/css/home.css" rel="stylesheet">
+        <script src="https://intranet.fisat.ac.in/asset/js/jquery-1.7.2.min.js"></script>
+       
+        
+
+    </head>
+    <body>
+<!--head-->
+
+    <div id="head_panel">
+            <div class="head_center">
+                <div id="site_name">
+<!--                    <div class="logo"></div>-->
+<!--                    <div class="main_name"></div>-->
+                   <!-- <div class="fo">FISAT<span> Online</span></div>
+                    
+                    <div class="sub_name">Federal institute of science and technology (FISAT)&reg;</div>
+               -->
+               <div class="fo">FISAT<span> CAMPUS AUTOMATION SYSTEM</span></div>
+                    <div class="sub_name">Federal institute of science and technology (FISAT)&reg;</div>
+               
+                </div>
+                <div class="fisat_img"></div>
+
+                    <br  class="clr">
+            </div>
+            
+        </div>
+<!--            head ends-->
+<div id="main_panel">
+    <div class="main_center">
+        <div class=" left_col"></div>
+        <div class="vertical_bar"></div>
+        <div class="right_col">
+              
+            <div id="log_infotxt"><span id="logtxt">LOGIN</span></div>
+             <div class="login_box">
+                 <form method="post" action="https://intranet.fisat.ac.in/">
+                 <table>
+                <tr>
+                    <td width="81">Username</td>
+                    <td width="151"><input type="text" name="userid" value="" placeholder=""></td>
+                     
+                </tr>
+                 <tr>
+                    <td>Password</td>
+                    <td><input type="password"  name="password" value="" placeholder=""></td>
+                     
+                </tr>
+                 </table>
+                     <div>
+                        <div class="spcl_btn" style="float: right;width:100px;" >
+                            <input type="submit"  value="Login" >
+                       </div>
+                     </div>
+            </form>
+                 <br style="clear:both;">
+        </div>          
+              <div  class="logfail" >Authentication Failed</div><script language="javascript">$(".logfail").fadeIn(300);
+               $(".logfail").delay(2500);
+               $(".logfail").fadeOut(1000,function(){$(this).stop(true);});</script>             
+                
+            
+        </div>
+        
+            <br style="clear:both;">
+    </div>
+
+</div>
+        
+
+
+
+
+
+<!--main ends-->
+       <div id="bottom_panel">
+            <div class="bottom_center">
+                <div class="site_name"><a target="_new" href="http://www.fisat.ac.in">fisat.ac.in</a></div>
+                <div class="site_feature">
+                    <ul>
+                        <li>Statements of Attendance</li>
+                        <li>Statements of Assignments</li>
+                        <li>Statements of Marks</li>
+                        <li>Discussion Groups</li>
+                        <li>Staff Notes</li>
+                        <li>Messaging</li>
+                        
+                    </ul>
+                </div>
+                
+                <div class="clr"></div>
+            </div>
+        </div>
+<!--        bottom ends here-->
+
+    </body>
+</html>
+<script>
+if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+</script>
