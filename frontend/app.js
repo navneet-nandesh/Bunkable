@@ -39,7 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ username, password })
             });
             
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                // This happens if Render returns an HTML error page (like a 502 Bad Gateway during deployment)
+                throw new Error(`Server is starting up or temporarily offline (Status ${response.status}). Please try again in 1 minute.`);
+            }
             
             if (response.ok && result.success) {
                 // Populate data
@@ -66,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("Fetch error:", error);
-            alert("Connection Error: Could not reach the backend server.");
+            alert(error.message.includes('Server is starting up') ? error.message : "Connection Error: Could not reach the backend server. It may be asleep or blocked.");
         } finally {
             loginBtnText.classList.remove('hidden');
             spinner.classList.add('hidden');
