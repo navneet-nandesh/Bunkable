@@ -47,9 +47,10 @@ app.post('/api/attendance', async (req, res) => {
             page.click('input[type="submit"]')
         ]);
 
-        // Check if login actually succeeded
-        if (page.url() === PORTAL_URL || page.url().includes('login')) {
-            throw new Error('Invalid Username or Password.');
+        // Bulletproof check: If the username input is still on the page, login failed!
+        const isStillOnLoginPage = await page.$('input[name="userid"]');
+        if (isStillOnLoginPage) {
+            throw new Error('Authentication Failed. Please check your credentials.');
         }
 
         // 4. Scrape the student name from the dashboard
