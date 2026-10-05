@@ -28,7 +28,7 @@ app.post('/api/attendance', async (req, res) => {
 
         // 1. Navigate to the login page
         const PORTAL_URL = 'https://intranet.fisat.ac.in/';
-        await page.goto(PORTAL_URL, { waitUntil: 'networkidle2' });
+        await page.goto(PORTAL_URL, { waitUntil: 'domcontentloaded' });
 
         // Handle any popup alerts from the portal (e.g. wrong password)
         page.on('dialog', async dialog => {
@@ -43,7 +43,7 @@ app.post('/api/attendance', async (req, res) => {
 
         // 3. Click login and wait for the dashboard to load
         await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle2' }),
+            page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
             page.click('input[type="submit"]')
         ]);
 
@@ -60,34 +60,29 @@ app.post('/api/attendance', async (req, res) => {
             studentName = nameText.split(',')[0].trim();
         } catch(e) {}
 
-        // 5. Navigate to the Attendance page safely
-        // Click the li tab and explicitly wait for the page to navigate!
-        await Promise.all([
-            page.waitForNavigation({ waitUntil: 'networkidle2' }),
-            page.evaluate(() => {
-                const tabs = document.querySelectorAll('li');
-                let found = false;
-                for (const tab of tabs) {
-                    if (tab.innerText && tab.innerText.includes('Attendance')) {
-                        tab.click();
-                        found = true;
-                        break;
-                    }
+        // 5. Navigate to the Attendance page safely (Handles both AJAX and Full Page reloads instantly!)
+        const navPromise = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const selPromise = page.waitForSelector('.atnd_head', { timeout: 15000 }).catch(() => {});
+        
+        await page.evaluate(() => {
+            const allEls = document.querySelectorAll('a, li, div, span, button');
+            for (const el of allEls) {
+                const text = el.innerText ? el.innerText.trim() : '';
+                if (text === 'Statements of Attendance' || text === 'Attendance') {
+                    el.click();
+                    return;
                 }
-                if (!found) {
-                    // Fallback: try clicking any element with 'Attendance' text
-                    const allEls = document.querySelectorAll('*');
-                    for (const el of allEls) {
-                        if (el.innerText === 'Statements of Attendance' || el.innerText === 'Attendance') {
-                            el.click();
-                            break;
-                        }
-                    }
-                }
-            })
-        ]);
-        // Wait for the semester list to load
-        await page.waitForSelector('.atnd_head', { timeout: 10000 });
+            }
+        });
+
+        // Wait for EITHER a page reload OR the attendance table to appear via AJAX!
+        await Promise.race([navPromise, selPromise]);
+        
+        // Wait up to 5 more seconds just to guarantee the element is fully rendered
+        const atndHead = await page.waitForSelector('.atnd_head', { timeout: 5000 }).catch(() => null);
+        if (!atndHead) {
+            throw new Error('Attendance table failed to load. The portal might be slow or under maintenance.');
+        }
         
         // 6. Click the most recent semester tab to load the table
         await page.click('.atnd_head');
