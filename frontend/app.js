@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Use local backend for development, or your live Render URL for production!
             const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3000' 
-                : 'https://bunkable-2.onrender.com';
+                : 'https://bunkable-3.onrender.com';
 
             const response = await fetch(`${BACKEND_URL}/api/attendance`, {
                 method: 'POST',
