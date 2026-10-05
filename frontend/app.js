@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetInput = document.getElementById('target-attendance');
     const subjectsGrid = document.getElementById('subjects-grid');
     const logoutBtn = document.getElementById('logout-btn');
+    const loginError = document.getElementById('login-error');
 
     // Global state for attendance data
     const subjectsData = [];
@@ -19,6 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleLogin(e) {
         e.preventDefault();
+        
+        // Clear previous error
+        loginError.classList.add('hidden');
+        loginError.innerText = '';
         
         // UI Loading state
         loginBtnText.classList.add('hidden');
@@ -68,11 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 
             } else {
                 console.warn("Backend error:", result.error);
-                alert("Login Failed: " + (result.error || "Invalid credentials or portal error."));
+                loginError.innerText = result.error || "Invalid credentials or portal error.";
+                loginError.classList.remove('hidden');
             }
         } catch (error) {
             console.error("Fetch error:", error);
-            alert(error.message.includes('Server is starting up') ? error.message : "Connection Error: Could not reach the backend server. It may be asleep or blocked.");
+            const msg = error.message.includes('Server is starting up') 
+                ? error.message 
+                : "Could not reach the backend server. It may be asleep or blocked.";
+            loginError.innerText = msg;
+            loginError.classList.remove('hidden');
         } finally {
             loginBtnText.classList.remove('hidden');
             spinner.classList.add('hidden');
