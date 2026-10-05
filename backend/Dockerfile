@@ -1,9 +1,8 @@
 FROM ghcr.io/puppeteer/puppeteer:latest
 
-# We don't need to install Chrome since it's already in the image,
-# but we need to tell Puppeteer where it is!
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+# The official image already sets PUPPETEER_EXECUTABLE_PATH to the correct internal path.
+# We just need to tell npm not to download it again.
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 WORKDIR /usr/src/app
 
