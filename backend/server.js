@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer-core');
-const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer');
 
 const app = express();
 app.use(cors());
@@ -16,12 +15,10 @@ app.post('/api/attendance', async (req, res) => {
 
     let browser;
     try {
-        // Launch a serverless-optimized Chromium instance
+        // Launch standard Puppeteer (with Render compatibility args)
         browser = await puppeteer.launch({ 
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
 
