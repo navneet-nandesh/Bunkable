@@ -30,6 +30,13 @@ app.post('/api/attendance', async (req, res) => {
         const PORTAL_URL = 'https://intranet.fisat.ac.in/';
         await page.goto(PORTAL_URL, { waitUntil: 'networkidle2' });
 
+        // Handle any popup alerts from the portal (e.g. wrong password)
+        page.on('dialog', async dialog => {
+            const msg = dialog.message();
+            await dialog.accept();
+            throw new Error(`Portal Alert: ${msg}`);
+        });
+
         // 2. Fill in the credentials
         await page.type('input[name="userid"]', username);
         await page.type('input[name="password"]', password);
@@ -39,6 +46,11 @@ app.post('/api/attendance', async (req, res) => {
             page.waitForNavigation({ waitUntil: 'networkidle2' }),
             page.click('input[type="submit"]')
         ]);
+
+        // Check if login actually succeeded
+        if (page.url() === PORTAL_URL || page.url().includes('login')) {
+            throw new Error('Invalid Username or Password.');
+        }
 
         // 4. Scrape the student name from the dashboard
         let studentName = 'Student';
