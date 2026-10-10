@@ -123,7 +123,7 @@ app.post('/api/attendance', async (req, res) => {
         });
 
         // Return everything instantly
-        res.json({ success: true, data: subjects, name: studentName });
+        res.json({ success: true, data: subjects, name: studentName, bid: bid });
 
     } catch (error) {
         console.error('API Error:', error.message);
