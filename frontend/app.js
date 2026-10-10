@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const subjectsGrid = document.getElementById('subjects-grid');
     const logoutBtn = document.getElementById('logout-btn');
     const loginError = document.getElementById('login-error');
+    const rememberMeCheckbox = document.getElementById('remember-me');
 
     // Global state for attendance data
     const subjectsData = [];
@@ -17,6 +18,18 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', handleLogin);
     targetInput.addEventListener('input', updateDashboard);
     logoutBtn.addEventListener('click', handleLogout);
+
+    // Auto-login logic
+    const savedUser = localStorage.getItem('bunkable_user');
+    const savedPass = localStorage.getItem('bunkable_pass');
+    
+    if (savedUser && savedPass) {
+        document.getElementById('student-id').value = savedUser;
+        document.getElementById('password').value = atob(savedPass); // Decode obfuscated password
+        if (rememberMeCheckbox) rememberMeCheckbox.checked = true;
+        // Trigger login automatically
+        setTimeout(() => loginForm.dispatchEvent(new Event('submit')), 100);
+    }
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -60,6 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('user-name').innerText = result.name;
                 }
                 
+                // Save credentials if Remember Me is checked
+                if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+                    localStorage.setItem('bunkable_user', username);
+                    localStorage.setItem('bunkable_pass', btoa(password)); // Simple Base64 obfuscation
+                } else {
+                    localStorage.removeItem('bunkable_user');
+                    localStorage.removeItem('bunkable_pass');
+                }
+                
                 // Transition pages
                 loginSection.classList.remove('active');
                 loginSection.classList.add('hidden');
@@ -90,6 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleLogout() {
+        // Clear saved credentials when explicitly logging out
+        localStorage.removeItem('bunkable_user');
+        localStorage.removeItem('bunkable_pass');
+
         dashboardSection.classList.remove('active');
         setTimeout(() => {
             dashboardSection.classList.add('hidden');
