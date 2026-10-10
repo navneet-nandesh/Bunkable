@@ -37,6 +37,16 @@ app.post('/api/attendance', async (req, res) => {
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
+        // SPEED OPTIMIZATION: Block images, CSS, and fonts from loading!
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if (['image', 'stylesheet', 'font'].includes(req.resourceType())) {
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+
         // ---------------------------------------------------------
         // TODO: Adapt this section to match your college portal
         // ---------------------------------------------------------
