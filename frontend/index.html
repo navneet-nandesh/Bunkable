@@ -90,15 +90,6 @@
                 </div>
             </div>
 
-            <div id="full-week-section" class="timetable-card glass-panel hidden" style="padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto;">
-                <div class="timetable-header" style="margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Weekly Schedule</h3>
-                </div>
-                <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
-                    <!-- Table injected by JS -->
-                </table>
-            </div>
-
             <div id="timetable-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
                 <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -110,6 +101,21 @@
                 <div id="timetable-content">
                     <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
                 </div>
+            </div>
+
+            <!-- Moved Bunk Planner -->
+
+            <div class="subjects-grid" id="subjects-grid" style="margin-bottom: 2rem;">
+                <!-- Subject cards will be injected here via JS -->
+            </div>
+
+            <div id="full-week-section" class="timetable-card glass-panel hidden" style="padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto;">
+                <div class="timetable-header" style="margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Weekly Schedule</h3>
+                </div>
+                <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
+                    <!-- Table injected by JS -->
+                </table>
             </div>
 
             <div id="bunk-planner-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
@@ -133,10 +139,6 @@
                 <div id="bunk-simulation-results" style="margin-top: 1.5rem; display: none;">
                     <!-- Results injected here -->
                 </div>
-            </div>
-
-            <div class="subjects-grid" id="subjects-grid">
-                <!-- Subject cards will be injected here via JS -->
             </div>
 
             <button id="logout-btn" class="btn-secondary">Log Out</button>

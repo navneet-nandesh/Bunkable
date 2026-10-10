@@ -468,7 +468,16 @@ document.addEventListener('DOMContentLoaded', () => {
             for(let i=0; i<8; i++) {
                 const subj = (tt[day] && tt[day][i]) ? tt[day][i] : 'FREE';
                 const isFree = subj === 'FREE';
-                const shortSubj = isFree ? '-' : (subj.length > 10 ? subj.substr(0,10)+'..' : subj);
+                
+                let displaySubj = subj;
+                if (!isFree && displaySubj.includes(' ')) {
+                    const firstWord = displaySubj.split(' ')[0];
+                    if (firstWord.includes('/') || /\d/.test(firstWord)) {
+                        displaySubj = displaySubj.substring(firstWord.length).trim();
+                    }
+                }
+                
+                const shortSubj = isFree ? '-' : (displaySubj.length > 14 ? displaySubj.substr(0,14)+'..' : displaySubj);
                 html += `<td style="color:${isFree ? 'var(--text-muted)' : 'var(--text-main)'};" title="${subj}">${shortSubj}</td>`;
             }
             html += '</tr>';
