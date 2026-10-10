@@ -37,10 +37,11 @@ app.post('/api/attendance', async (req, res) => {
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
-        // SPEED OPTIMIZATION: Block images, CSS, and fonts from loading!
+        // SPEED OPTIMIZATION: Block images and fonts from loading!
+        // We leave 'stylesheet' alone because Puppeteer needs CSS to calculate 'innerText' properly.
         await page.setRequestInterception(true);
         page.on('request', (req) => {
-            if (['image', 'stylesheet', 'font'].includes(req.resourceType())) {
+            if (['image', 'font'].includes(req.resourceType())) {
                 req.abort();
             } else {
                 req.continue();
@@ -118,7 +119,7 @@ app.post('/api/attendance', async (req, res) => {
         const attendanceData = await page.evaluate(() => {
             const subjects = [];
             // The subject-wise listing is in the second table of the loaded info box
-            const tables = document.querySelectorAll('.atnd_info_box .table');
+            const tables = document.querySelectorAll('.atnd_info_box table');
             if (tables.length < 2) return subjects;
             
             const rows = tables[1].querySelectorAll('tbody tr');
