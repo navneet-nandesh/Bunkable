@@ -118,26 +118,33 @@ app.post('/api/attendance', async (req, res) => {
         // 7. Scrape the real attendance data!
         const attendanceData = await page.evaluate(() => {
             const subjects = [];
-            // The subject-wise listing is in the second table of the loaded info box
-            const tables = document.querySelectorAll('.atnd_info_box table');
-            if (tables.length < 2) return subjects;
             
-            const rows = tables[1].querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('td');
-                if (cols.length >= 3) {
-                    const total = parseInt(cols[1].innerText.trim(), 10) || 0;
-                    const attended = parseInt(cols[2].innerText.trim(), 10) || 0;
-                    
-                    // Only include subjects that actually have classes scheduled
-                    if (total > 0) {
-                        subjects.push({
-                            name: cols[0].innerText.trim(),
-                            attended: attended,
-                            total: total
-                        });
+            // Get the first populated table (from the semester we just clicked)
+            const activeTable = document.querySelector('.atnd_info_box table');
+            if (!activeTable) return subjects;
+            
+            // Grab all tables inside that specific semester's box
+            const tables = activeTable.closest('.atnd_info_box').querySelectorAll('table');
+            
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr, tr');
+                rows.forEach(row => {
+                    const cols = row.querySelectorAll('td');
+                    if (cols.length >= 3) {
+                        const subjectName = cols[0].innerText.trim();
+                        const total = parseInt(cols[1].innerText.trim(), 10);
+                        const attended = parseInt(cols[2].innerText.trim(), 10);
+                        
+                        // Filter out summary/header rows and only keep valid subject rows
+                        if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total')) {
+                            subjects.push({
+                                name: subjectName,
+                                attended: attended,
+                                total: total
+                            });
+                        }
                     }
-                }
+                });
             });
             return subjects;
         });
