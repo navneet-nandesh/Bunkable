@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v5'; // Bumped version to push updates!
+const CACHE_NAME = 'bunkable-v6'; // Bumped version to push updates!
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

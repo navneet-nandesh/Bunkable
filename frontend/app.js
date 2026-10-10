@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     alert('✨ Timetable successfully imported by AI! Please verify the entries before publishing.');
                 } else {
-                    alert('AI failed to parse the timetable. Try a clearer image.');
+                    alert('AI Error: ' + (data.error || 'Failed to parse image.') + '\n\nDetails: ' + JSON.stringify(data.details || ''));
                 }
             } catch (err) {
                 alert('Connection error during AI extraction.');
