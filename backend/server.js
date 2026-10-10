@@ -34,7 +34,7 @@ app.post('/api/attendance', async (req, res) => {
     try {
         const browser = await getBrowser();
         // Use an incognito context so cookies aren't shared between requests!
-        context = await browser.createBrowserContext();
+        context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
 
         // ---------------------------------------------------------
