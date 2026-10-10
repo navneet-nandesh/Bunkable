@@ -1,26 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const puppeteer = require('puppeteer');
+const { wrapper } = require('axios-cookiejar-support');
+const axios = require('axios');
+const { CookieJar } = require('tough-cookie');
+const cheerio = require('cheerio');
+const https = require('https');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-let browserInstance = null;
-async function getBrowser() {
-    if (!browserInstance) {
-        console.log('Launching new Puppeteer browser instance...');
-        browserInstance = await puppeteer.launch({ 
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        browserInstance.on('disconnected', () => {
-            console.log('Puppeteer browser disconnected. Will relaunch on next request.');
-            browserInstance = null;
-        });
-    }
-    return browserInstance;
-}
 
 app.post('/api/attendance', async (req, res) => {
     const { username, password } = req.body;
@@ -29,142 +17,78 @@ app.post('/api/attendance', async (req, res) => {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
-    let page;
-    let context;
     try {
-        const browser = await getBrowser();
-        // Use an incognito context so cookies aren't shared between requests!
-        context = await browser.createIncognitoBrowserContext();
-        page = await context.newPage();
-
-        // SPEED OPTIMIZATION: Block images and fonts from loading!
-        // We leave 'stylesheet' alone because Puppeteer needs CSS to calculate 'innerText' properly.
-        await page.setRequestInterception(true);
-        page.on('request', (req) => {
-            if (['image', 'font'].includes(req.resourceType())) {
-                req.abort();
-            } else {
-                req.continue();
+        // Setup HTTP client that automatically stores cookies
+        const jar = new CookieJar();
+        const client = wrapper(axios.create({ 
+            jar,
+            withCredentials: true,
+            // Bypass internal SSL issues
+            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+                'Content-Type': 'application/x-www-form-urlencoded'
             }
-        });
+        }));
 
-        // ---------------------------------------------------------
-        // TODO: Adapt this section to match your college portal
-        // ---------------------------------------------------------
-
-        // 1. Navigate to the login page
-        const PORTAL_URL = 'https://intranet.fisat.ac.in/';
-        await page.goto(PORTAL_URL, { waitUntil: 'domcontentloaded' });
-
-        // Handle any popup alerts from the portal (e.g. wrong password)
-        page.on('dialog', async dialog => {
-            const msg = dialog.message();
-            await dialog.accept();
-            throw new Error(`Portal Alert: ${msg}`);
-        });
-
-        // 2. Fill in the credentials
-        await page.waitForSelector('input[name="userid"]', { timeout: 15000 });
-        await page.type('input[name="userid"]', username);
-        await page.type('input[name="password"]', password);
-
-        // 3. Click login and wait for the dashboard to load
-        await Promise.all([
-            page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-            page.click('input[type="submit"]')
-        ]);
-
-        // Bulletproof check: If the username input is still on the page, login failed!
-        const isStillOnLoginPage = await page.$('input[name="userid"]');
-        if (isStillOnLoginPage) {
+        // 1. Send Login Request
+        const loginPayload = new URLSearchParams();
+        loginPayload.append('userid', username);
+        loginPayload.append('password', password);
+        
+        const loginRes = await client.post('https://intranet.fisat.ac.in/', loginPayload.toString());
+        
+        if (loginRes.data.includes('Authentication Failed') || loginRes.data.includes('name="userid"')) {
             throw new Error('Authentication Failed. Please check your credentials.');
         }
 
-        // 4. Scrape the student name from the dashboard
+        // Extract student name from the dashboard HTML
         let studentName = 'Student';
-        try {
-            const nameText = await page.$eval('.log_data', el => el.innerText);
+        const $dashboard = cheerio.load(loginRes.data);
+        const nameText = $dashboard('.log_data').first().text();
+        if (nameText) {
             studentName = nameText.split(',')[0].trim();
-        } catch(e) {}
+        }
 
-        // 5. Navigate to the Attendance page safely (Handles both AJAX and Full Page reloads instantly!)
-        const navPromise = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        const selPromise = page.waitForSelector('.atnd_head', { timeout: 15000 }).catch(() => {});
+        // 2. Fetch the Attendance Shell page to find the Batch ID (BID)
+        const attendanceShellRes = await client.get('https://intranet.fisat.ac.in/index.php/ecampus/attendance');
+        const $shell = cheerio.load(attendanceShellRes.data);
         
-        await page.evaluate(() => {
-            const allEls = document.querySelectorAll('a, li, div, span, button');
-            for (const el of allEls) {
-                const text = el.innerText ? el.innerText.trim() : '';
-                if (text === 'Statements of Attendance' || text === 'Attendance') {
-                    el.click();
-                    return;
+        const firstTab = $shell('.atnd_head').first();
+        const bid = firstTab.attr('bid');
+        
+        if (!bid) {
+            throw new Error('Could not find your current semester data.');
+        }
+
+        // 3. Fetch the actual Attendance Table Data using the hidden API!
+        const reportPayload = new URLSearchParams();
+        reportPayload.append('batchid', '0');
+        
+        const reportRes = await client.post(`https://intranet.fisat.ac.in/index.php/ecampus/attendancereport/${bid}`, reportPayload.toString());
+        const $report = cheerio.load(reportRes.data);
+        
+        const subjects = [];
+        $report('table tr').each((i, row) => {
+            const cols = $report(row).find('td');
+            if (cols.length >= 3) {
+                const subjectName = $report(cols[0]).text().trim();
+                const total = parseInt($report(cols[1]).text().trim(), 10);
+                const attended = parseInt($report(cols[2]).text().trim(), 10);
+                
+                // Keep only valid subject rows (ignore headers and totals)
+                if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total')) {
+                    subjects.push({ name: subjectName, attended, total });
                 }
             }
         });
 
-        // Wait for EITHER a page reload OR the attendance table to appear via AJAX!
-        await Promise.race([navPromise, selPromise]);
-        
-        // Wait up to 5 more seconds just to guarantee the element is fully rendered
-        const atndHead = await page.waitForSelector('.atnd_head', { timeout: 5000 }).catch(() => null);
-        if (!atndHead) {
-            throw new Error('Attendance table failed to load. The portal might be slow or under maintenance.');
-        }
-        
-        // 6. Click the most recent semester tab to load the table
-        await page.click('.atnd_head');
-        await page.waitForSelector('.atnd_info_box table', { timeout: 10000 }).catch(e => console.log('Timeout'));
-
-        // 7. Scrape the real attendance data!
-        const attendanceData = await page.evaluate(() => {
-            const subjects = [];
-            
-            // Get the first populated table (from the semester we just clicked)
-            const activeTable = document.querySelector('.atnd_info_box table');
-            if (!activeTable) return subjects;
-            
-            // Grab all tables inside that specific semester's box
-            const tables = activeTable.closest('.atnd_info_box').querySelectorAll('table');
-            
-            tables.forEach(table => {
-                const rows = table.querySelectorAll('tbody tr, tr');
-                rows.forEach(row => {
-                    const cols = row.querySelectorAll('td');
-                    if (cols.length >= 3) {
-                        const subjectName = cols[0].innerText.trim();
-                        const total = parseInt(cols[1].innerText.trim(), 10);
-                        const attended = parseInt(cols[2].innerText.trim(), 10);
-                        
-                        // Filter out summary/header rows and only keep valid subject rows
-                        if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total')) {
-                            subjects.push({
-                                name: subjectName,
-                                attended: attended,
-                                total: total
-                            });
-                        }
-                    }
-                });
-            });
-            return subjects;
-        });
-
-        // ---------------------------------------------------------
-        // End of portal-specific logic
-        // ---------------------------------------------------------
-
-        // Return the scraped data and name to the frontend
-        res.json({ success: true, data: attendanceData, name: studentName });
+        // Return everything instantly
+        res.json({ success: true, data: subjects, name: studentName });
 
     } catch (error) {
-        console.error('Scraping error:', error);
+        console.error('API Error:', error.message);
         res.status(500).json({ error: error.message || error.toString() });
-    } finally {
-        if (context) {
-            await context.close().catch(e => console.error('Error closing context:', e));
-        } else if (page) {
-            await page.close().catch(e => console.error('Error closing page:', e));
-        }
     }
 });
 
