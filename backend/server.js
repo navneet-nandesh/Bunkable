@@ -24,8 +24,6 @@ app.post('/api/attendance', async (req, res) => {
         const client = wrapper(axios.create({ 
             jar,
             withCredentials: true,
-            // Bypass internal SSL issues
-            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
                 'Content-Type': 'application/x-www-form-urlencoded'
