@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Timetable Sharing Logic (Check on load) ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedTT = urlParams.get('tt');
+    if (sharedTT) {
+        try {
+            const parsedTT = JSON.parse(atob(sharedTT));
+            if (parsedTT && parsedTT.monday && parsedTT.tuesday) {
+                if (confirm('Someone shared a custom Bunkable timetable with you! Do you want to apply and save it as your personal schedule?')) {
+                    localStorage.setItem('bunkable_timetable', JSON.stringify(parsedTT));
+                    alert('Timetable saved successfully! Please log in to see it.');
+                }
+            }
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch(e) {
+            console.error('Invalid shared timetable');
+        }
+    }
+
     // Elements
     const loginForm = document.getElementById('login-form');
     const loginSection = document.getElementById('login-section');
@@ -243,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Timetable Logic ---
     async function fetchTimetable(bid) {
         document.getElementById('edit-timetable-btn').style.display = 'block';
+        document.getElementById('share-timetable-btn').style.display = 'block';
         
         // 1. Check for personal local override
         const localTT = localStorage.getItem('bunkable_timetable');
@@ -433,6 +453,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('cancel-timetable').addEventListener('click', () => {
         document.getElementById('timetable-modal').classList.add('hidden');
+    });
+
+    document.getElementById('share-timetable-btn').addEventListener('click', () => {
+        if (!window.currentTimetable) {
+            alert('No timetable available to share.');
+            return;
+        }
+        const encoded = btoa(JSON.stringify(window.currentTimetable));
+        const shareUrl = `${window.location.origin}${window.location.pathname}?tt=${encoded}`;
+        
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            const btn = document.getElementById('share-timetable-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Copied! ✅';
+            setTimeout(() => { btn.innerText = originalText; }, 2000);
+        }).catch(err => {
+            alert('Failed to copy link. Check console for URL.');
+            console.log('Share URL:', shareUrl);
+        });
     });
 
     function getBuilderTimetable() {
