@@ -1,8 +1,6 @@
-FROM ghcr.io/puppeteer/puppeteer:latest
+FROM node:18-alpine
 
-# The official image already sets PUPPETEER_EXECUTABLE_PATH to the correct internal path.
-# We just need to tell npm not to download it again.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# We no longer need Puppeteer, so we can use a tiny, blazing-fast Alpine Linux image!
 
 WORKDIR /usr/src/app
 
