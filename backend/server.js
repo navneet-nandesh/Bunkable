@@ -10,6 +10,41 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Gist DB logic for crowdsourced timetables
+let GIST_ID = null;
+
+async function initGistDB() {
+    if (!process.env.GITHUB_TOKEN) {
+        console.warn('No GITHUB_TOKEN provided. Timetable feature disabled.');
+        return;
+    }
+    try {
+        const response = await axios.get('https://api.github.com/gists', {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        const gists = response.data;
+        const dbGist = gists.find(g => g.description === 'Bunkable Timetables DB');
+        
+        if (dbGist) {
+            GIST_ID = dbGist.id;
+            console.log('Found Gist DB:', GIST_ID);
+        } else {
+            const createRes = await axios.post('https://api.github.com/gists', {
+                description: 'Bunkable Timetables DB',
+                public: false,
+                files: { 'timetables.json': { content: '{}' } }
+            }, {
+                headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+            });
+            GIST_ID = createRes.data.id;
+            console.log('Created Gist DB:', GIST_ID);
+        }
+    } catch (err) {
+        console.error('Failed to init Gist DB:', err.message);
+    }
+}
+initGistDB();
+
 app.post('/api/attendance', async (req, res) => {
     const { username, password } = req.body;
 
@@ -90,6 +125,46 @@ app.post('/api/attendance', async (req, res) => {
     } catch (error) {
         console.error('API Error:', error.message);
         res.status(500).json({ error: error.message || error.toString() });
+    }
+});
+
+// Timetable Endpoints
+app.get('/api/timetables/:bid', async (req, res) => {
+    if (!GIST_ID || !process.env.GITHUB_TOKEN) return res.status(500).json({ error: 'DB not ready' });
+    try {
+        const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        const content = response.data.files['timetables.json'].content;
+        const db = JSON.parse(content);
+        res.json({ success: true, timetable: db[req.params.bid] || null });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch timetable' });
+    }
+});
+
+app.post('/api/timetables/:bid', async (req, res) => {
+    if (!GIST_ID || !process.env.GITHUB_TOKEN) return res.status(500).json({ error: 'DB not ready' });
+    try {
+        // Fetch current DB
+        const getRes = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        const db = JSON.parse(getRes.data.files['timetables.json'].content);
+        
+        // Update DB
+        db[req.params.bid] = req.body.timetable;
+        
+        // Save back to Gist
+        await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+            files: { 'timetables.json': { content: JSON.stringify(db, null, 2) } }
+        }, {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to save timetable' });
     }
 });
 
