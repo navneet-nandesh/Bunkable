@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '';
         days.forEach(day => {
             html += `<div class="builder-day">${day.toUpperCase()}</div>`;
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 8; i++) {
                 html += `<select class="builder-select" data-day="${day}" data-period="${i}">
                     <option value="FREE">-- Free Period --</option>`;
                 subjectsData.forEach(s => {

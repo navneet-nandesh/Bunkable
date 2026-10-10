@@ -139,13 +139,13 @@ app.post('/api/timetables/extract', async (req, res) => {
     
     // Obfuscated Gemini Key to avoid secret scanners
     const GEMINI_KEY = 'AQ.Ab8RN6I0EEJT6G7' + 'AOgf-Ex1rUcQEO8s' + 'B7ZQRq_DpMENGuj_qLg'; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`;
     
     const prompt = `You are an AI that extracts college timetables from images.
 Here is the strict list of valid subject names for this student's semester:
 ${subjects.map(s => `- ${s}`).join('\n')}
 
-Extract the daily schedule for Monday to Friday (maximum 6 periods per day). 
+Extract the daily schedule for Monday to Friday (up to 8 periods per day). 
 Match the text in the image to the closest matching subject name from the valid list above.
 If a period is a break, lunch, free, seminar, lab, or empty, output "FREE".
 Return ONLY raw JSON matching this exact structure:
@@ -159,11 +159,15 @@ Return ONLY raw JSON matching this exact structure:
 Do NOT include markdown formatting like \`\`\`json. Return only the raw JSON object.`;
 
     try {
+        const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+
         const response = await axios.post(url, {
             contents: [{
                 parts: [
                     { text: prompt },
-                    { inlineData: { mimeType: 'image/jpeg', data: imageBase64.replace(/^data:image\/\w+;base64,/, '') } }
+                    { inlineData: { mimeType: mimeType, data: base64Data } }
                 ]
             }],
             generationConfig: { temperature: 0.1 }
@@ -175,7 +179,7 @@ Do NOT include markdown formatting like \`\`\`json. Return only the raw JSON obj
         res.json({ success: true, timetable: extracted });
     } catch (e) {
         console.error('Gemini error:', e?.response?.data || e.message);
-        res.status(500).json({ error: 'AI extraction failed' });
+        res.status(500).json({ error: 'AI extraction failed', details: e?.response?.data || e.message });
     }
 });
 
