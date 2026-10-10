@@ -242,12 +242,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Timetable Logic ---
     async function fetchTimetable(bid) {
+        document.getElementById('edit-timetable-btn').style.display = 'block';
+        
+        // 1. Check for personal local override
+        const localTT = localStorage.getItem('bunkable_timetable');
+        if (localTT) {
+            window.currentTimetable = JSON.parse(localTT);
+            renderTodayTimetable(window.currentTimetable);
+            return;
+        }
+
+        // 2. Otherwise fetch from cloud
         const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
         try {
             const res = await fetch(`${BACKEND_URL}/api/timetables/${bid}`);
             const data = await res.json();
             if (data.success && data.timetable) {
+                window.currentTimetable = data.timetable;
                 renderTodayTimetable(data.timetable);
             } else {
                 showTimetableMissing();
@@ -307,19 +319,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('setup-timetable-btn').addEventListener('click', openTimetableBuilder);
     }
 
+    document.getElementById('edit-timetable-btn').addEventListener('click', openTimetableBuilder);
+
     function openTimetableBuilder() {
         const modal = document.getElementById('timetable-modal');
         const builder = document.getElementById('timetable-builder');
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
         
+        const tt = window.currentTimetable || {};
+
         let html = '';
         days.forEach(day => {
             html += `<div class="builder-day">${day.toUpperCase()}</div>`;
             for (let i = 0; i < 8; i++) {
+                // Pre-fill value if it exists
+                let selectedVal = (tt[day] && tt[day][i]) ? tt[day][i] : 'FREE';
+                
                 html += `<select class="builder-select" data-day="${day}" data-period="${i}">
-                    <option value="FREE">-- Free Period --</option>`;
+                    <option value="FREE" ${selectedVal === 'FREE' ? 'selected' : ''}>-- Free Period --</option>`;
                 subjectsData.forEach(s => {
-                    html += `<option value="${s.name}">${s.name}</option>`;
+                    html += `<option value="${s.name}" ${selectedVal === s.name ? 'selected' : ''}>${s.name}</option>`;
                 });
                 html += `</select>`;
             }
@@ -392,15 +411,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('timetable-modal').classList.add('hidden');
     });
 
-    document.getElementById('save-timetable').addEventListener('click', async (e) => {
-        const btn = e.target;
-        btn.innerText = 'Publishing...';
-        
+    function getBuilderTimetable() {
         const timetable = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[] };
         document.querySelectorAll('.builder-select').forEach(select => {
             const day = select.dataset.day;
             timetable[day].push(select.value);
         });
+        return timetable;
+    }
+
+    document.getElementById('save-local-timetable').addEventListener('click', () => {
+        const timetable = getBuilderTimetable();
+        localStorage.setItem('bunkable_timetable', JSON.stringify(timetable));
+        window.currentTimetable = timetable;
+        document.getElementById('timetable-modal').classList.add('hidden');
+        renderTodayTimetable(timetable);
+    });
+
+    document.getElementById('save-timetable').addEventListener('click', async (e) => {
+        const btn = e.target;
+        btn.innerText = 'Publishing...';
+        
+        const timetable = getBuilderTimetable();
+        window.currentTimetable = timetable;
 
         const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
