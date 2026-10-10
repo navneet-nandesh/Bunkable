@@ -6,6 +6,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+let browserInstance = null;
+async function getBrowser() {
+    if (!browserInstance) {
+        console.log('Launching new Puppeteer browser instance...');
+        browserInstance = await puppeteer.launch({ 
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        browserInstance.on('disconnected', () => {
+            console.log('Puppeteer browser disconnected. Will relaunch on next request.');
+            browserInstance = null;
+        });
+    }
+    return browserInstance;
+}
+
 app.post('/api/attendance', async (req, res) => {
     const { username, password } = req.body;
 
@@ -13,14 +29,10 @@ app.post('/api/attendance', async (req, res) => {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
-    let browser;
+    let page;
     try {
-        // Launch standard Puppeteer (with Render compatibility args)
-        browser = await puppeteer.launch({ 
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
-        const page = await browser.newPage();
+        const browser = await getBrowser();
+        page = await browser.newPage();
 
         // ---------------------------------------------------------
         // TODO: Adapt this section to match your college portal
@@ -38,6 +50,7 @@ app.post('/api/attendance', async (req, res) => {
         });
 
         // 2. Fill in the credentials
+        await page.waitForSelector('input[name="userid"]', { timeout: 15000 });
         await page.type('input[name="userid"]', username);
         await page.type('input[name="password"]', password);
 
@@ -126,8 +139,8 @@ app.post('/api/attendance', async (req, res) => {
         console.error('Scraping error:', error);
         res.status(500).json({ error: error.message || error.toString() });
     } finally {
-        if (browser) {
-            await browser.close();
+        if (page) {
+            await page.close().catch(e => console.error('Error closing page:', e));
         }
     }
 });
