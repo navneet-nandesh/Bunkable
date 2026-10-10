@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const { wrapper } = require('axios-cookiejar-support');
 const axios = require('axios');
 const { CookieJar } = require('tough-cookie');
+// 'axios-cookiejar-support' is dynamically imported in the route handler because it is an ES Module
 const cheerio = require('cheerio');
 const https = require('https');
 
@@ -20,6 +20,7 @@ app.post('/api/attendance', async (req, res) => {
     try {
         // Setup HTTP client that automatically stores cookies
         const jar = new CookieJar();
+        const { wrapper } = await import('axios-cookiejar-support');
         const client = wrapper(axios.create({ 
             jar,
             withCredentials: true,
