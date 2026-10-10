@@ -328,6 +328,66 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
     }
 
+    document.getElementById('ai-upload-btn').addEventListener('click', () => {
+        document.getElementById('ai-timetable-upload').click();
+    });
+
+    document.getElementById('ai-timetable-upload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const btn = document.getElementById('ai-upload-btn');
+        const originalText = btn.innerText;
+        btn.innerText = '✨ AI is reading image...';
+        btn.disabled = true;
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const imageBase64 = reader.result;
+            const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
+            
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/timetables/extract`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64,
+                        subjects: subjectsData.map(s => s.name)
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.success && data.timetable) {
+                    // Auto-fill the select boxes
+                    const tt = data.timetable;
+                    document.querySelectorAll('.builder-select').forEach(select => {
+                        const day = select.dataset.day;
+                        const period = select.dataset.period;
+                        if (tt[day] && tt[day][period]) {
+                            const val = tt[day][period];
+                            if (Array.from(select.options).some(opt => opt.value === val)) {
+                                select.value = val;
+                            } else {
+                                select.value = 'FREE';
+                            }
+                        }
+                    });
+                    alert('✨ Timetable successfully imported by AI! Please verify the entries before publishing.');
+                } else {
+                    alert('AI failed to parse the timetable. Try a clearer image.');
+                }
+            } catch (err) {
+                alert('Connection error during AI extraction.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                e.target.value = ''; // reset file input
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+
     document.getElementById('cancel-timetable').addEventListener('click', () => {
         document.getElementById('timetable-modal').classList.add('hidden');
     });
