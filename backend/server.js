@@ -30,9 +30,12 @@ app.post('/api/attendance', async (req, res) => {
     }
 
     let page;
+    let context;
     try {
         const browser = await getBrowser();
-        page = await browser.newPage();
+        // Use an incognito context so cookies aren't shared between requests!
+        context = await browser.createBrowserContext();
+        page = await context.newPage();
 
         // ---------------------------------------------------------
         // TODO: Adapt this section to match your college portal
@@ -139,7 +142,9 @@ app.post('/api/attendance', async (req, res) => {
         console.error('Scraping error:', error);
         res.status(500).json({ error: error.message || error.toString() });
     } finally {
-        if (page) {
+        if (context) {
+            await context.close().catch(e => console.error('Error closing context:', e));
+        } else if (page) {
             await page.close().catch(e => console.error('Error closing page:', e));
         }
     }
