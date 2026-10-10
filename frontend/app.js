@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTodayTimetable(timetable) {
-        document.getElementById('view-full-week-btn').style.display = 'block';
+        if(typeof renderFullWeek === 'function') renderFullWeek(timetable);
         const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const todayIdx = new Date().getDay();
         const todayStr = days[todayIdx];
@@ -455,8 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Full Week View Logic ---
-    document.getElementById('view-full-week-btn').addEventListener('click', () => {
-        const tt = window.currentTimetable;
+    window.renderFullWeek = function(tt) {
         if (!tt) return;
         
         let html = '<thead><tr><th>Day</th>';
@@ -477,12 +476,8 @@ document.addEventListener('DOMContentLoaded', () => {
         html += '</tbody>';
         
         document.getElementById('full-week-table').innerHTML = html;
-        document.getElementById('full-week-modal').classList.remove('hidden');
-    });
-
-    document.getElementById('close-full-week').addEventListener('click', () => {
-        document.getElementById('full-week-modal').classList.add('hidden');
-    });
+        document.getElementById('full-week-section').classList.remove('hidden');
+    };
 
     // --- Bunk Planner Logic ---
     document.getElementById('calculate-bunk-btn').addEventListener('click', () => {

@@ -75,6 +75,30 @@
                 </div>
             </header>
 
+            <div class="stats-overview" style="margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <h3>Overall Attendance</h3>
+                    <div class="stat-value" id="overall-percentage">0%</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Classes</h3>
+                    <div class="stat-value" id="overall-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Classes Attended</h3>
+                    <div class="stat-value" id="overall-attended">0</div>
+                </div>
+            </div>
+
+            <div id="full-week-section" class="timetable-card glass-panel hidden" style="padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto;">
+                <div class="timetable-header" style="margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Weekly Schedule</h3>
+                </div>
+                <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
+                    <!-- Table injected by JS -->
+                </table>
+            </div>
+
             <div id="timetable-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
                 <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -86,7 +110,6 @@
                 <div id="timetable-content">
                     <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
                 </div>
-                <button id="view-full-week-btn" class="btn-secondary" style="width: 100%; margin-top: 15px; display: none; padding: 10px;">View Full Weekly Grid</button>
             </div>
 
             <div id="bunk-planner-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
@@ -109,21 +132,6 @@
                 
                 <div id="bunk-simulation-results" style="margin-top: 1.5rem; display: none;">
                     <!-- Results injected here -->
-                </div>
-            </div>
-
-            <div class="stats-overview">
-                <div class="stat-card">
-                    <h3>Overall Attendance</h3>
-                    <div class="stat-value" id="overall-percentage">0%</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Total Classes</h3>
-                    <div class="stat-value" id="overall-total">0</div>
-                </div>
-                <div class="stat-card">
-                    <h3>Classes Attended</h3>
-                    <div class="stat-value" id="overall-attended">0</div>
                 </div>
             </div>
 
@@ -158,20 +166,7 @@
         </div>
     </div>
 
-    <!-- Full Week Timetable Modal -->
-    <div id="full-week-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel" style="padding: 1.5rem; max-width: 800px; width: 95%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 style="margin: 0;">Weekly Schedule</h2>
-                <button id="close-full-week" class="btn-secondary" style="margin: 0; padding: 5px 10px; width: auto; font-size: 0.8rem;">Close</button>
-            </div>
-            <div style="overflow-x: auto;">
-                <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
-                    <!-- Table injected by JS -->
-                </table>
-            </div>
-        </div>
-    </div>
+    <!-- Empty replacement for removed modal -->
 
     <script src="app.js"></script>
     <script>
