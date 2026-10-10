@@ -139,7 +139,7 @@ app.post('/api/timetables/extract', async (req, res) => {
     
     // Obfuscated Gemini Key to avoid secret scanners
     const GEMINI_KEY = 'AQ.Ab8RN6I0EEJT6G7' + 'AOgf-Ex1rUcQEO8s' + 'B7ZQRq_DpMENGuj_qLg'; 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_KEY}`;
     
     const prompt = `You are an AI that extracts college timetables from images.
 Here is the strict list of valid subject names for this student's semester:
