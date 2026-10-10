@@ -477,8 +477,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 
-                const shortSubj = isFree ? '-' : (displaySubj.length > 14 ? displaySubj.substr(0,14)+'..' : displaySubj);
-                html += `<td style="color:${isFree ? 'var(--text-muted)' : 'var(--text-main)'};" title="${subj}">${shortSubj}</td>`;
+                const shortSubj = isFree ? '-' : displaySubj;
+                html += `<td style="color:${isFree ? 'var(--text-muted)' : 'var(--text-main)'}; font-size:0.75rem; padding: 6px;" title="${subj}">${shortSubj}</td>`;
             }
             html += '</tr>';
         });
