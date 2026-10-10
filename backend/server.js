@@ -75,8 +75,10 @@ app.post('/api/attendance', async (req, res) => {
                 const total = parseInt($report(cols[1]).text().trim(), 10);
                 const attended = parseInt($report(cols[2]).text().trim(), 10);
                 
-                // Keep only valid subject rows (ignore headers and totals)
-                if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total')) {
+                // Keep only valid subject rows (ignore headers, dates, and totals)
+                // A valid subject name must contain at least one letter!
+                const hasLetters = /[a-zA-Z]/.test(subjectName);
+                if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total') && hasLetters) {
                     subjects.push({ name: subjectName, attended, total });
                 }
             }
