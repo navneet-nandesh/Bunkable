@@ -75,6 +75,16 @@
                 </div>
             </header>
 
+            <div id="timetable-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Today's Classes</h3>
+                    <span id="current-day" style="color: var(--primary); font-weight: 600;">Monday</span>
+                </div>
+                <div id="timetable-content">
+                    <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
+                </div>
+            </div>
+
             <div class="stats-overview">
                 <div class="stat-card">
                     <h3>Overall Attendance</h3>
@@ -97,6 +107,21 @@
             <button id="logout-btn" class="btn-secondary">Log Out</button>
         </section>
     </main>
+
+    <!-- Timetable Builder Modal -->
+    <div id="timetable-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="padding: 2rem;">
+            <h2 style="margin-bottom: 5px;">Build Class Timetable</h2>
+            <p class="subtitle" style="margin-bottom: 1.5rem;">Set up the weekly schedule for everyone in your batch.</p>
+            <div id="timetable-builder" style="display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 10px;">
+                <!-- Builder UI injected by JS -->
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+                <button id="cancel-timetable" class="btn-secondary" style="margin-top: 0; padding: 0.8rem;">Cancel</button>
+                <button id="save-timetable" class="btn-primary" style="margin-top: 0; padding: 0.8rem;">Publish to Cloud</button>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
     <script>

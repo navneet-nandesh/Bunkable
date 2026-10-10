@@ -73,6 +73,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('user-name').innerText = result.name;
                 }
                 
+                // Fetch Timetable from Cloud
+                if (result.bid) {
+                    window.currentBatchId = result.bid;
+                    fetchTimetable(result.bid);
+                }
+
                 // Save credentials if Remember Me is checked
                 if (rememberMeCheckbox && rememberMeCheckbox.checked) {
                     localStorage.setItem('bunkable_user', username);
@@ -233,4 +239,125 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
         }
     }
+
+    // --- Timetable Logic ---
+    async function fetchTimetable(bid) {
+        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/timetables/${bid}`);
+            const data = await res.json();
+            if (data.success && data.timetable) {
+                renderTodayTimetable(data.timetable);
+            } else {
+                showTimetableMissing();
+            }
+        } catch (e) {
+            document.getElementById('timetable-content').innerHTML = `<p style="color:var(--danger)">Failed to load timetable from cloud.</p>`;
+        }
+    }
+
+    function renderTodayTimetable(timetable) {
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const todayIdx = new Date().getDay();
+        const todayStr = days[todayIdx];
+        document.getElementById('current-day').innerText = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
+        
+        if (todayIdx === 0 || todayIdx === 6) {
+            document.getElementById('timetable-content').innerHTML = `<p style="text-align:center; color: var(--text-muted); margin-top: 10px;">It's the weekend! No classes today. 🎉</p>`;
+            return;
+        }
+
+        const todayClasses = timetable[todayStr] || [];
+        if (todayClasses.length === 0) {
+            document.getElementById('timetable-content').innerHTML = `<p style="text-align:center; color: var(--text-muted);">No classes scheduled for today.</p>`;
+            return;
+        }
+
+        let html = '';
+        todayClasses.forEach((cls, i) => {
+            if (!cls || cls === 'FREE') return;
+            const subj = subjectsData.find(s => s.name === cls);
+            let color = 'var(--text-main)';
+            let percText = '';
+            if (subj) {
+                const perc = (subj.attended / subj.total) * 100;
+                const target = parseFloat(document.getElementById('target-attendance').value) || 75;
+                color = getPercentageColor(perc, target);
+                percText = `<span style="color:${color}; font-weight:700;">${perc.toFixed(1)}%</span>`;
+            }
+            html += `<div class="period-item">
+                <div style="display:flex; align-items:center; gap: 15px;">
+                    <span style="color:var(--text-muted); font-size: 0.9rem;">${i+1}</span>
+                    <span class="period-name">${cls}</span>
+                </div>
+                ${percText}
+            </div>`;
+        });
+        document.getElementById('timetable-content').innerHTML = html || `<p style="text-align:center; color: var(--text-muted);">Free day! 🎉</p>`;
+    }
+
+    function showTimetableMissing() {
+        document.getElementById('timetable-content').innerHTML = `
+            <div style="text-align:center; padding: 10px;">
+                <p style="margin-bottom:15px; color:var(--text-muted); font-size: 0.95rem;">No cloud timetable exists for your batch yet.</p>
+                <button id="setup-timetable-btn" class="btn-primary" style="padding: 12px; font-size: 0.95rem; width: auto; margin: 0 auto;">Setup Timetable for Everyone</button>
+            </div>
+        `;
+        document.getElementById('setup-timetable-btn').addEventListener('click', openTimetableBuilder);
+    }
+
+    function openTimetableBuilder() {
+        const modal = document.getElementById('timetable-modal');
+        const builder = document.getElementById('timetable-builder');
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        
+        let html = '';
+        days.forEach(day => {
+            html += `<div class="builder-day">${day.toUpperCase()}</div>`;
+            for (let i = 0; i < 6; i++) {
+                html += `<select class="builder-select" data-day="${day}" data-period="${i}">
+                    <option value="FREE">-- Free Period --</option>`;
+                subjectsData.forEach(s => {
+                    html += `<option value="${s.name}">${s.name}</option>`;
+                });
+                html += `</select>`;
+            }
+        });
+        builder.innerHTML = html;
+        modal.classList.remove('hidden');
+    }
+
+    document.getElementById('cancel-timetable').addEventListener('click', () => {
+        document.getElementById('timetable-modal').classList.add('hidden');
+    });
+
+    document.getElementById('save-timetable').addEventListener('click', async (e) => {
+        const btn = e.target;
+        btn.innerText = 'Publishing...';
+        
+        const timetable = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[] };
+        document.querySelectorAll('.builder-select').forEach(select => {
+            const day = select.dataset.day;
+            timetable[day].push(select.value);
+        });
+
+        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
+        
+        try {
+            await fetch(`${BACKEND_URL}/api/timetables/${window.currentBatchId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timetable })
+            });
+            document.getElementById('timetable-modal').classList.add('hidden');
+            renderTodayTimetable(timetable);
+        } catch (e) {
+            alert('Failed to save to cloud. Please check your connection.');
+        } finally {
+            btn.innerText = 'Publish to Cloud';
+        }
+    });
+
 });
