@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTodayTimetable(timetable) {
+        document.getElementById('view-full-week-btn').style.display = 'block';
         const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const todayIdx = new Date().getDay();
         const todayStr = days[todayIdx];
@@ -451,6 +452,128 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             btn.innerText = 'Publish to Cloud';
         }
+    });
+
+    // --- Full Week View Logic ---
+    document.getElementById('view-full-week-btn').addEventListener('click', () => {
+        const tt = window.currentTimetable;
+        if (!tt) return;
+        
+        let html = '<thead><tr><th>Day</th>';
+        for(let i=1; i<=8; i++) html += `<th>P${i}</th>`;
+        html += '</tr></thead><tbody>';
+        
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        days.forEach(day => {
+            html += `<tr><td style="font-weight:bold; color:var(--primary); text-transform:capitalize;">${day.substr(0,3)}</td>`;
+            for(let i=0; i<8; i++) {
+                const subj = (tt[day] && tt[day][i]) ? tt[day][i] : 'FREE';
+                const isFree = subj === 'FREE';
+                const shortSubj = isFree ? '-' : (subj.length > 10 ? subj.substr(0,10)+'..' : subj);
+                html += `<td style="color:${isFree ? 'var(--text-muted)' : 'var(--text-main)'};" title="${subj}">${shortSubj}</td>`;
+            }
+            html += '</tr>';
+        });
+        html += '</tbody>';
+        
+        document.getElementById('full-week-table').innerHTML = html;
+        document.getElementById('full-week-modal').classList.remove('hidden');
+    });
+
+    document.getElementById('close-full-week').addEventListener('click', () => {
+        document.getElementById('full-week-modal').classList.add('hidden');
+    });
+
+    // --- Bunk Planner Logic ---
+    document.getElementById('calculate-bunk-btn').addEventListener('click', () => {
+        if (!window.currentTimetable) {
+            alert('You need to setup or load a Timetable first!');
+            return;
+        }
+        const startStr = document.getElementById('bunk-start-date').value;
+        const endStr = document.getElementById('bunk-end-date').value;
+        if (!startStr || !endStr) {
+            alert('Please select both start and end dates.');
+            return;
+        }
+
+        const startDate = new Date(startStr);
+        const endDate = new Date(endStr);
+        
+        if (endDate < startDate) {
+            alert('End date cannot be before start date!');
+            return;
+        }
+
+        const missedClasses = {};
+        let currentDate = new Date(startDate);
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        
+        while (currentDate <= endDate) {
+            const dayStr = days[currentDate.getDay()];
+            const dailySchedule = window.currentTimetable[dayStr] || [];
+            
+            dailySchedule.forEach(subj => {
+                if (subj && subj !== 'FREE') {
+                    missedClasses[subj] = (missedClasses[subj] || 0) + 1;
+                }
+            });
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (Object.keys(missedClasses).length === 0) {
+            document.getElementById('bunk-simulation-results').innerHTML = `<p style="color:var(--text-muted); text-align:center;">You won't miss any classes on these dates! 🎉</p>`;
+            document.getElementById('bunk-simulation-results').style.display = 'block';
+            return;
+        }
+
+        let html = '<h4 style="margin-bottom: 10px; color: var(--text-main);">Predicted Attendance:</h4>';
+        html += '<div style="display: flex; flex-direction: column; gap: 8px;">';
+        
+        let originalTotalAttended = 0;
+        let originalTotalClasses = 0;
+        let newTotalAttended = 0;
+        let newTotalClasses = 0;
+
+        subjectsData.forEach(s => {
+            originalTotalAttended += s.attended;
+            originalTotalClasses += s.total;
+            
+            const missedCount = missedClasses[s.name] || 0;
+            if (missedCount > 0) {
+                const newAttended = s.attended;
+                const newTotal = s.total + missedCount;
+                const newPerc = (newAttended / newTotal) * 100;
+                const target = parseFloat(document.getElementById('target-attendance').value) || 75;
+                const color = getPercentageColor(newPerc, target);
+                
+                newTotalAttended += newAttended;
+                newTotalClasses += newTotal;
+
+                html += `<div class="period-item" style="padding: 10px;">
+                    <div style="display:flex; flex-direction:column; gap: 2px;">
+                        <span style="font-weight: 600; font-size: 0.9rem;">${s.name} <span style="color:var(--danger); font-size:0.8rem;">(-${missedCount} classes)</span></span>
+                        <span style="color:var(--text-muted); font-size: 0.8rem;">Drops from ${((s.attended/s.total)*100).toFixed(1)}% → <span style="color:${color}; font-weight:700;">${newPerc.toFixed(1)}%</span></span>
+                    </div>
+                </div>`;
+            } else {
+                newTotalAttended += s.attended;
+                newTotalClasses += s.total;
+            }
+        });
+        
+        const newOverall = (newTotalAttended / newTotalClasses) * 100;
+        const target = parseFloat(document.getElementById('target-attendance').value) || 75;
+        const overallColor = getPercentageColor(newOverall, target);
+
+        html += `</div>`;
+        html += `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+            <p style="color:var(--text-muted); font-size: 0.9rem;">Overall Attendance will drop to:</p>
+            <h2 style="color: ${overallColor}; margin: 5px 0;">${newOverall.toFixed(1)}%</h2>
+        </div>`;
+
+        document.getElementById('bunk-simulation-results').innerHTML = html;
+        document.getElementById('bunk-simulation-results').style.display = 'block';
     });
 
 });

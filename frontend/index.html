@@ -86,6 +86,30 @@
                 <div id="timetable-content">
                     <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
                 </div>
+                <button id="view-full-week-btn" class="btn-secondary" style="width: 100%; margin-top: 15px; display: none; padding: 10px;">View Full Weekly Grid</button>
+            </div>
+
+            <div id="bunk-planner-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+                <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">✈️ Bunk Planner</h3>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Select a date range you plan to take leave. We'll simulate exactly how it damages your attendance.</p>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">From Date</label>
+                        <input type="date" id="bunk-start-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(15, 23, 42, 0.8); color: white; border: 1px solid var(--glass-border); margin-top: 5px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: var(--text-muted);">To Date</label>
+                        <input type="date" id="bunk-end-date" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(15, 23, 42, 0.8); color: white; border: 1px solid var(--glass-border); margin-top: 5px;">
+                    </div>
+                </div>
+                <button id="calculate-bunk-btn" class="btn-primary" style="width: 100%; padding: 10px;">Simulate Absences</button>
+                
+                <div id="bunk-simulation-results" style="margin-top: 1.5rem; display: none;">
+                    <!-- Results injected here -->
+                </div>
             </div>
 
             <div class="stats-overview">
@@ -130,6 +154,21 @@
                 <button id="cancel-timetable" class="btn-secondary" style="margin-top: 0; padding: 0.8rem; flex: 1;">Cancel</button>
                 <button id="save-local-timetable" class="btn-primary" style="margin-top: 0; padding: 0.8rem; flex: 1;">Save (Just me)</button>
                 <button id="save-timetable" class="btn-secondary" style="margin-top: 0; padding: 0.8rem; font-size: 0.85rem; flex: 1; border-color: var(--primary);">Publish to Cloud</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Week Timetable Modal -->
+    <div id="full-week-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel" style="padding: 1.5rem; max-width: 800px; width: 95%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin: 0;">Weekly Schedule</h2>
+                <button id="close-full-week" class="btn-secondary" style="margin: 0; padding: 5px 10px; width: auto; font-size: 0.8rem;">Close</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
+                    <!-- Table injected by JS -->
+                </table>
             </div>
         </div>
     </div>

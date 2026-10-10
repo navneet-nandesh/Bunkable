@@ -492,3 +492,14 @@ button {
     outline: none;
 }
 .builder-select:focus { border-color: var(--primary); }
+
+#full-week-table th, #full-week-table td {
+    border: 1px solid var(--glass-border);
+    padding: 10px 5px;
+    font-size: 0.8rem;
+    min-width: 50px;
+}
+#full-week-table th {
+    background: rgba(255,255,255,0.05);
+    font-weight: 600;
+}
