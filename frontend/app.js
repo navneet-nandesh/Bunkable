@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     targetInput.addEventListener('input', updateDashboard);
     logoutBtn.addEventListener('click', handleLogout);
 
-    // --- Multi-Page Navigation Logic ---
+    // --- Multi-Page Navigation Logic (GitHub-Style UnderlineNav) ---
     function switchPage(pageName) {
         const pages = document.querySelectorAll('.dashboard-page');
         pages.forEach(p => {
@@ -60,21 +60,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Sync Desktop Top Navigation Tabs
-        document.querySelectorAll('.nav-tab').forEach(tab => {
+        // Sync GitHub UnderlineNav Tabs
+        document.querySelectorAll('.UnderlineNav-item').forEach(tab => {
             if (tab.dataset.page === pageName) {
                 tab.classList.add('active');
+                tab.setAttribute('aria-current', 'page');
             } else {
                 tab.classList.remove('active');
-            }
-        });
-
-        // Sync Mobile Bottom Navigation Items
-        document.querySelectorAll('.mobile-nav-item').forEach(item => {
-            if (item.dataset.page === pageName) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
+                tab.removeAttribute('aria-current');
             }
         });
 
@@ -82,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Attach click events for both desktop top nav and mobile bottom dock
-    document.querySelectorAll('.nav-tab, .mobile-nav-item').forEach(btn => {
+    // Attach click events for GitHub UnderlineNav tabs
+    document.querySelectorAll('.UnderlineNav-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const pageName = e.currentTarget.dataset.page;
             if (pageName) {
@@ -143,6 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Populate data
                 subjectsData.length = 0;
                 subjectsData.push(...result.data);
+                const ghCounter = document.getElementById('gh-counter-attendance');
+                if (ghCounter) ghCounter.innerText = subjectsData.length;
                 if (result.name) {
                     document.getElementById('user-name').innerText = result.name;
                 }

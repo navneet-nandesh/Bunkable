@@ -805,128 +805,265 @@ button {
 /* --- App Navigation Bar & Multi-Page Layout --- */
 .dashboard-container {
     max-width: 1060px;
-    padding: 2.2rem 2.5rem 3rem 2.5rem;
+    padding: 1.5rem 2rem 3rem 2rem;
     position: relative;
 }
 
-.app-nav-bar {
+/* GitHub-Style Header & Navigation */
+.gh-header {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    margin-bottom: 1.8rem;
+    box-shadow: 0 8px 24px rgba(1, 4, 9, 0.5);
+    overflow: hidden;
+}
+
+.gh-header-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(18, 18, 22, 0.75);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 10px 18px;
-    margin-bottom: 2rem;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    padding: 12px 18px;
+    border-bottom: 1px solid #21262d;
     gap: 16px;
     flex-wrap: wrap;
 }
 
-.nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.nav-logo {
-    border-radius: 8px;
-    object-fit: contain;
-}
-
-.nav-title {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--text-main);
-}
-
-.nav-tabs {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(0, 0, 0, 0.35);
-    padding: 5px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.nav-tab {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: auto;
-}
-
-.nav-tab:hover:not(.active) {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.nav-tab.active {
-    color: #09090b !important;
-    background: var(--primary) !important;
-    box-shadow: 0 0 16px rgba(204, 255, 0, 0.35);
-    font-weight: 700;
-}
-
-.nav-actions {
+.gh-header-left {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.user-chip {
+.gh-brand-icon {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    color: var(--text-main);
+    justify-content: center;
 }
 
-.nav-user-name {
-    font-weight: 600;
-    color: var(--text-main);
+.gh-logo {
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #0d1117;
 }
 
-.nav-logout-btn {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    color: #fca5a5;
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: 0.82rem;
+.gh-repo-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.05rem;
+    color: #8b949e;
+}
+
+.gh-owner {
+    color: #58a6ff;
+    font-weight: 500;
+}
+
+.gh-slash {
+    color: #484f58;
+    font-weight: 300;
+}
+
+.gh-repo {
+    color: #f0f6fc;
     font-weight: 600;
-    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.gh-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 8px;
+    border-radius: 2em;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    margin-left: 6px;
+    line-height: 18px;
+    background: #0d1117;
+}
+
+.gh-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.gh-target-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #8b949e;
+}
+
+.gh-target-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8b949e;
+    margin: 0;
+}
+
+.gh-target-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.gh-target-input-wrap input {
+    width: 44px;
+    padding: 1px 4px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f0f6fc;
+    background: transparent;
+    border: none;
+    text-align: center;
+    font-family: inherit;
+    box-shadow: none;
+}
+
+.gh-target-input-wrap input:focus {
+    box-shadow: none;
+    border-color: transparent;
+}
+
+.gh-target-pct {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.gh-user-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #f0f6fc;
+    font-weight: 500;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 20px;
+    padding: 4px 12px;
+}
+
+.gh-username {
+    font-weight: 600;
+    color: #f0f6fc;
+}
+
+.gh-btn-signout {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s ease;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #c9d1d9;
+    cursor: pointer;
+    transition: 0.15s ease;
     width: auto;
+    font-family: inherit;
 }
 
-.nav-logout-btn:hover {
-    background: rgba(239, 68, 68, 0.2);
+.gh-btn-signout:hover {
+    background: #b62324;
+    border-color: #f85149;
     color: #ffffff;
-    border-color: rgba(239, 68, 68, 0.45);
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 10px rgba(248, 81, 73, 0.3);
+}
+
+/* GitHub UnderlineNav Tab Strip */
+.UnderlineNav {
+    display: flex;
+    align-items: center;
+    background: #0d1117;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.UnderlineNav::-webkit-scrollbar {
+    display: none;
+}
+
+.UnderlineNav-body {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.UnderlineNav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #8b949e;
+    text-decoration: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    width: auto;
+    font-family: inherit;
+    white-space: nowrap;
+    border-radius: 6px 6px 0 0;
+}
+
+.UnderlineNav-item .octicon {
+    fill: currentColor;
+    opacity: 0.75;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+}
+
+.UnderlineNav-item:hover {
+    color: #f0f6fc;
+    background-color: rgba(177, 186, 196, 0.08);
+}
+
+.UnderlineNav-item.active {
+    color: #f0f6fc !important;
+    font-weight: 600;
+    border-bottom: 2px solid var(--primary) !important;
+    background: transparent;
+}
+
+.UnderlineNav-item.active .octicon {
+    opacity: 1;
+    fill: var(--primary);
+}
+
+.UnderlineNav-item.active .Counter {
+    background-color: rgba(204, 255, 0, 0.18);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.Counter {
+    display: inline-block;
+    padding: 0 7px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    color: #c9d1d9;
+    text-align: center;
+    background-color: rgba(110, 118, 129, 0.4);
+    border-radius: 2em;
+    min-width: 20px;
+    transition: all 0.15s ease;
 }
 
 /* Dashboard Pages & Transitions */
@@ -937,20 +1074,20 @@ button {
 .dashboard-page {
     display: none;
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
 }
 
 .dashboard-page.active {
     display: block;
     opacity: 1;
     transform: translateY(0);
-    animation: fadeInPage 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInPage 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeInPage {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
@@ -981,80 +1118,31 @@ button {
     color: var(--text-muted);
 }
 
-/* Mobile Bottom Navigation Dock */
-.mobile-bottom-nav {
-    display: none;
-}
-
 @media (max-width: 768px) {
     .dashboard-container {
-        padding: 1.5rem 1rem 100px 1rem;
+        padding: 1rem 0.8rem 2.5rem 0.8rem;
     }
 
-    .app-nav-bar {
-        padding: 10px 14px;
-        margin-bottom: 1.5rem;
+    .gh-header-inner {
+        padding: 10px 12px;
+        gap: 10px;
     }
 
-    /* On mobile, center tabs move to the bottom dock */
-    .app-nav-bar .nav-tabs {
-        display: none;
+    .gh-header-right {
+        width: 100%;
+        justify-content: space-between;
     }
 
-    .mobile-bottom-nav {
-        display: flex;
-        position: fixed;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: calc(100% - 28px);
-        max-width: 380px;
-        background: rgba(18, 18, 22, 0.9);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 22px;
-        padding: 6px;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.4);
-        z-index: 99;
-        justify-content: space-around;
-        align-items: center;
+    .UnderlineNav {
+        padding: 0 8px;
     }
 
-    .mobile-nav-item {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        padding: 8px 4px;
-        border-radius: 14px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        font-family: inherit;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: auto;
-    }
-
-    .mobile-nav-item svg {
-        transition: transform 0.2s ease;
-    }
-
-    .mobile-nav-item.active {
-        color: var(--primary);
-        background: rgba(204, 255, 0, 0.12);
-    }
-
-    .mobile-nav-item.active svg {
-        stroke: var(--primary);
-        transform: scale(1.1);
-        filter: drop-shadow(0 0 6px rgba(204, 255, 0, 0.5));
+    .UnderlineNav-item {
+        padding: 10px 12px;
+        font-size: 13px;
     }
 }
+
 
 
 
