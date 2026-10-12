@@ -297,7 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const perc = (subj.attended / subj.total) * 100;
                 const target = parseFloat(document.getElementById('target-attendance').value) || 75;
                 color = getPercentageColor(perc, target);
-                percText = `<span style="color:${color}; font-weight:700;">${perc.toFixed(1)}%</span>`;
+                
+                const newPerc = (subj.attended / (subj.total + 1)) * 100;
+                const newColor = getPercentageColor(newPerc, target);
+                
+                percText = `<div style="display:flex; flex-direction:column; align-items:flex-end; gap: 2px;">
+                    <span style="color:${color}; font-weight:700;">${perc.toFixed(1)}%</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">If skipped: <span style="color:${newColor}; font-weight:600;">${newPerc.toFixed(1)}%</span></span>
+                </div>`;
             }
             html += `<div class="period-item">
                 <div style="display:flex; align-items:center; gap: 15px;">
