@@ -11,13 +11,13 @@
     --bg-input: #0d0d15;
     --border: rgba(255, 255, 255, 0.07);
     --border-hover: rgba(255, 255, 255, 0.14);
-    --border-active: rgba(139, 92, 246, 0.5);
+    --border-active: rgba(204, 255, 0, 0.5);
     --text-main: #e8e8ed;
     --text-muted: #71717a;
     --text-dim: #52525b;
-    --accent: #8b5cf6;
-    --accent-soft: rgba(139, 92, 246, 0.15);
-    --accent-glow: rgba(139, 92, 246, 0.3);
+    --accent: #ccff00;
+    --accent-soft: rgba(204, 255, 0, 0.12);
+    --accent-glow: rgba(204, 255, 0, 0.3);
     --primary: #ccff00;
     --primary-soft: rgba(204, 255, 0, 0.12);
     --success: #10b981;
@@ -61,8 +61,8 @@ body {
     min-height: 100vh;
     padding: 2rem;
     background: 
-        radial-gradient(ellipse at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(204, 255, 0, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 50%, rgba(204, 255, 0, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(163, 230, 0, 0.04) 0%, transparent 50%),
         var(--bg-body);
 }
 
@@ -154,8 +154,8 @@ button {
     border-radius: var(--radius-sm);
     font-size: 0.9rem;
     font-weight: 600;
-    background: var(--accent);
-    color: #fff;
+    background: linear-gradient(135deg, var(--accent), #a3cc00);
+    color: #09090b;
     margin-top: 0.75rem;
     display: flex;
     justify-content: center;
@@ -164,8 +164,8 @@ button {
 }
 
 .btn-primary:hover {
-    background: #7c3aed;
-    box-shadow: 0 4px 20px var(--accent-glow);
+    background: #b3e600;
+    box-shadow: 0 6px 24px var(--accent-glow);
     transform: translateY(-1px);
 }
 
@@ -264,16 +264,16 @@ button {
 }
 
 .backup-optin-box {
-    background: rgba(139, 92, 246, 0.04);
-    border: 1px solid rgba(139, 92, 246, 0.12);
+    background: rgba(204, 255, 0, 0.04);
+    border: 1px solid rgba(204, 255, 0, 0.12);
     border-radius: var(--radius);
     padding: 12px 14px;
     transition: all 0.2s ease;
 }
 
 .backup-optin-box:hover {
-    background: rgba(139, 92, 246, 0.07);
-    border-color: rgba(139, 92, 246, 0.25);
+    background: rgba(204, 255, 0, 0.07);
+    border-color: rgba(204, 255, 0, 0.25);
 }
 
 .backup-optin-header {
@@ -449,19 +449,20 @@ button {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: rgba(204, 255, 0, 0.04);
+    border: 1px solid rgba(204, 255, 0, 0.15);
+    margin-top: 4px;
 }
 
 .sidebar-target-label {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--text-muted);
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
     margin: 0;
 }
 
@@ -477,11 +478,11 @@ button {
 }
 
 .sidebar-target-input-wrap input {
-    width: 42px;
-    padding: 2px 4px;
-    font-size: 0.88rem;
+    width: 52px;
+    padding: 4px 6px;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--accent);
     background: transparent;
     border: none;
     text-align: center;
@@ -496,7 +497,7 @@ button {
 .sidebar-target-pct {
     color: var(--accent);
     font-weight: 700;
-    font-size: 0.82rem;
+    font-size: 1.1rem;
 }
 
 /* Sidebar Footer */
@@ -723,7 +724,7 @@ button {
 .badge-accent {
     background: var(--accent-soft);
     color: var(--accent);
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(204, 255, 0, 0.3);
 }
 
 /* =========================
@@ -1110,7 +1111,7 @@ button {
 .tt-day-pill.active {
     background: var(--accent-soft) !important;
     border-color: var(--accent) !important;
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    box-shadow: 0 0 10px rgba(204, 255, 0, 0.15);
 }
 
 .tt-day-pill.active .tt-day-title {
@@ -1119,7 +1120,7 @@ button {
 }
 
 .tt-day-pill.active .tt-day-date {
-    color: rgba(139, 92, 246, 0.8);
+    color: rgba(204, 255, 0, 0.8);
     font-weight: 600;
 }
 
@@ -1130,7 +1131,7 @@ button {
     background: var(--accent-soft);
     color: var(--accent);
     font-weight: 600;
-    border: 1px solid rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(204, 255, 0, 0.3);
 }
 
 /* Period items */
@@ -1322,7 +1323,7 @@ button {
 
 .ai-import-box {
     background: var(--accent-soft);
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(204, 255, 0, 0.2);
     border-radius: var(--radius);
     padding: 14px;
     margin-bottom: 16px;

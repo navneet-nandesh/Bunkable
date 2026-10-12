@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v22'; // Render-style dashboard redesign!
+const CACHE_NAME = 'bunkable-v23'; // Restored lime green color scheme + bigger target
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
