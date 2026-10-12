@@ -5,21 +5,46 @@ const { CookieJar } = require('tough-cookie');
 // 'axios-cookiejar-support' is dynamically imported in the route handler because it is an ES Module
 const cheerio = require('cheerio');
 const https = require('https');
+const crypto = require('crypto');
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Gist DB logic for crowdsourced timetables
+// --- Encryption & Security Helpers ---
+const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET || 'bunkable-attendance-secret-key-32b';
+const SECRET_KEY = crypto.createHash('sha256').update(ENCRYPTION_SECRET).digest();
+
+function encryptPassword(password) {
+    const iv = crypto.randomBytes(16);
+    const cipher = crypto.createCipheriv('aes-256-cbc', SECRET_KEY, iv);
+    let encrypted = cipher.update(password, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return iv.toString('hex') + ':' + encrypted;
+}
+
+function decryptPassword(encryptedText) {
+    const parts = encryptedText.split(':');
+    const iv = Buffer.from(parts[0], 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', SECRET_KEY, iv);
+    let decrypted = decipher.update(parts[1], 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+}
+
+function hashPassword(password) {
+    return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+// --- Gist DB logic for timetables & attendance backups ---
 let GIST_ID = null;
-// Obfuscated to avoid GitHub secret scanner revoking it
 const PAT = 'ghp_' + 'ydw0lNdebbqVzW' + '25Pizx07CsxzpD' + '8o2IrCpa';
 process.env.GITHUB_TOKEN = process.env.GITHUB_TOKEN || PAT;
 
 async function initGistDB() {
     if (!process.env.GITHUB_TOKEN) {
-        console.warn('No GITHUB_TOKEN provided. Timetable feature disabled.');
+        console.warn('No GITHUB_TOKEN provided. Database features disabled.');
         return;
     }
     try {
@@ -32,11 +57,23 @@ async function initGistDB() {
         if (dbGist) {
             GIST_ID = dbGist.id;
             console.log('Found Gist DB:', GIST_ID);
+            // Ensure attendance_backups.json file exists in this Gist
+            if (!dbGist.files['attendance_backups.json']) {
+                await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+                    files: { 'attendance_backups.json': { content: '{}' } }
+                }, {
+                    headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+                });
+                console.log('Initialized attendance_backups.json in Gist DB');
+            }
         } else {
             const createRes = await axios.post('https://api.github.com/gists', {
                 description: 'Bunkable Timetables DB',
                 public: false,
-                files: { 'timetables.json': { content: '{}' } }
+                files: { 
+                    'timetables.json': { content: '{}' },
+                    'attendance_backups.json': { content: '{}' }
+                }
             }, {
                 headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
             });
@@ -49,88 +86,246 @@ async function initGistDB() {
 }
 initGistDB();
 
+async function getBackupsDB() {
+    if (!GIST_ID || !process.env.GITHUB_TOKEN) return {};
+    try {
+        const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        const file = response.data.files['attendance_backups.json'];
+        if (file && file.content) {
+            return JSON.parse(file.content);
+        }
+        return {};
+    } catch (err) {
+        console.error('Error reading backups DB:', err.message);
+        return {};
+    }
+}
+
+async function saveBackupsDB(backups) {
+    if (!GIST_ID || !process.env.GITHUB_TOKEN) return false;
+    try {
+        await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {
+            files: {
+                'attendance_backups.json': { content: JSON.stringify(backups, null, 2) }
+            }
+        }, {
+            headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
+        });
+        return true;
+    } catch (err) {
+        console.error('Error saving backups DB:', err.message);
+        return false;
+    }
+}
+
+// --- Live Portal Scraper Helper ---
+async function scrapePortal(username, password) {
+    const jar = new CookieJar();
+    const { wrapper } = await import('axios-cookiejar-support');
+    const client = wrapper(axios.create({ 
+        jar,
+        withCredentials: true,
+        timeout: 15000,
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }));
+
+    // 1. Send Login Request
+    const loginPayload = new URLSearchParams();
+    loginPayload.append('userid', username);
+    loginPayload.append('password', password);
+    
+    const loginRes = await client.post('https://intranet.fisat.ac.in/', loginPayload.toString());
+    
+    if (loginRes.data.includes('Authentication Failed') || loginRes.data.includes('name="userid"')) {
+        const authErr = new Error('Authentication Failed. Please check your credentials.');
+        authErr.isAuthError = true;
+        throw authErr;
+    }
+
+    // Extract student name
+    let studentName = 'Student';
+    const $dashboard = cheerio.load(loginRes.data);
+    const nameText = $dashboard('.log_data').first().text();
+    if (nameText) {
+        studentName = nameText.split(',')[0].trim();
+    }
+
+    // 2. Fetch the Attendance Shell page to find Batch ID (BID)
+    const attendanceShellRes = await client.get('https://intranet.fisat.ac.in/index.php/ecampus/attendance');
+    const $shell = cheerio.load(attendanceShellRes.data);
+    
+    const firstTab = $shell('.atnd_head').first();
+    const bid = firstTab.attr('bid');
+    
+    if (!bid) {
+        throw new Error('Could not find your current semester data.');
+    }
+
+    // 3. Fetch Attendance Table Data
+    const reportPayload = new URLSearchParams();
+    reportPayload.append('batchid', '0');
+    
+    const reportRes = await client.post(`https://intranet.fisat.ac.in/index.php/ecampus/attendancereport/${bid}`, reportPayload.toString());
+    const $report = cheerio.load(reportRes.data);
+    
+    const subjects = [];
+    $report('table tr').each((i, row) => {
+        const cols = $report(row).find('td');
+        if (cols.length >= 3) {
+            const subjectName = $report(cols[0]).text().trim();
+            const total = parseInt($report(cols[1]).text().trim(), 10);
+            const attended = parseInt($report(cols[2]).text().trim(), 10);
+            
+            const hasLetters = /[a-zA-Z]/.test(subjectName);
+            if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total') && hasLetters) {
+                subjects.push({ name: subjectName, attended, total });
+            }
+        }
+    });
+
+    return { subjects, studentName, bid };
+}
+
+// --- Attendance Route with Live Fetch & Fallback ---
 app.post('/api/attendance', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, storeBackup } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({ error: 'Username and password required' });
     }
 
+    const cleanUsername = String(username).trim();
+
     try {
-        // Setup HTTP client that automatically stores cookies
-        const jar = new CookieJar();
-        const { wrapper } = await import('axios-cookiejar-support');
-        const client = wrapper(axios.create({ 
-            jar,
-            withCredentials: true,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }));
+        // Attempt live scraping from intranet
+        const { subjects, studentName, bid } = await scrapePortal(cleanUsername, password);
 
-        // 1. Send Login Request
-        const loginPayload = new URLSearchParams();
-        loginPayload.append('userid', username);
-        loginPayload.append('password', password);
-        
-        const loginRes = await client.post('https://intranet.fisat.ac.in/', loginPayload.toString());
-        
-        if (loginRes.data.includes('Authentication Failed') || loginRes.data.includes('name="userid"')) {
-            throw new Error('Authentication Failed. Please check your credentials.');
-        }
-
-        // Extract student name from the dashboard HTML
-        let studentName = 'Student';
-        const $dashboard = cheerio.load(loginRes.data);
-        const nameText = $dashboard('.log_data').first().text();
-        if (nameText) {
-            studentName = nameText.split(',')[0].trim();
-        }
-
-        // 2. Fetch the Attendance Shell page to find the Batch ID (BID)
-        const attendanceShellRes = await client.get('https://intranet.fisat.ac.in/index.php/ecampus/attendance');
-        const $shell = cheerio.load(attendanceShellRes.data);
-        
-        const firstTab = $shell('.atnd_head').first();
-        const bid = firstTab.attr('bid');
-        
-        if (!bid) {
-            throw new Error('Could not find your current semester data.');
-        }
-
-        // 3. Fetch the actual Attendance Table Data using the hidden API!
-        const reportPayload = new URLSearchParams();
-        reportPayload.append('batchid', '0');
-        
-        const reportRes = await client.post(`https://intranet.fisat.ac.in/index.php/ecampus/attendancereport/${bid}`, reportPayload.toString());
-        const $report = cheerio.load(reportRes.data);
-        
-        const subjects = [];
-        $report('table tr').each((i, row) => {
-            const cols = $report(row).find('td');
-            if (cols.length >= 3) {
-                const subjectName = $report(cols[0]).text().trim();
-                const total = parseInt($report(cols[1]).text().trim(), 10);
-                const attended = parseInt($report(cols[2]).text().trim(), 10);
-                
-                // Keep only valid subject rows (ignore headers, dates, and totals)
-                // A valid subject name must contain at least one letter!
-                const hasLetters = /[a-zA-Z]/.test(subjectName);
-                if (total > 0 && !isNaN(total) && !isNaN(attended) && subjectName.length > 2 && !subjectName.toLowerCase().includes('total') && hasLetters) {
-                    subjects.push({ name: subjectName, attended, total });
-                }
-            }
+        // Intranet is up and running! Return live data directly
+        res.json({ 
+            success: true, 
+            data: subjects, 
+            name: studentName, 
+            bid: bid,
+            isBackup: false 
         });
 
-        // Return everything instantly
-        res.json({ success: true, data: subjects, name: studentName, bid: bid });
+        // If user opted in, store/refresh their credentials and attendance in DB asynchronously
+        if (storeBackup) {
+            (async () => {
+                try {
+                    const backups = await getBackupsDB();
+                    backups[cleanUsername] = {
+                        username: cleanUsername,
+                        encryptedPassword: encryptPassword(password),
+                        passwordHash: hashPassword(password),
+                        name: studentName,
+                        bid: bid,
+                        data: subjects,
+                        lastUpdated: new Date().toISOString(),
+                        optedIn: true
+                    };
+                    await saveBackupsDB(backups);
+                    console.log(`[Backup DB] Saved attendance & credentials for ${cleanUsername}`);
+                } catch (saveErr) {
+                    console.error('[Backup DB] Failed to save backup for user:', saveErr.message);
+                }
+            })();
+        }
 
     } catch (error) {
-        console.error('API Error:', error.message);
-        res.status(500).json({ error: error.message || error.toString() });
+        console.error('Scraping Error:', error.message);
+
+        // If credentials failed on the live portal, DO NOT return backup!
+        if (error.isAuthError) {
+            return res.status(401).json({ error: error.message });
+        }
+
+        // Intranet is DOWN or unreachable -> Fall back to stored values in database!
+        console.log(`[Downtime Fallback] Intranet unreachable. Checking database for ${cleanUsername}...`);
+        try {
+            const backups = await getBackupsDB();
+            const userRecord = backups[cleanUsername];
+
+            if (!userRecord || !userRecord.data) {
+                return res.status(503).json({ 
+                    error: 'FISAT Intranet is currently offline or unreachable, and no saved backup exists for your account.' 
+                });
+            }
+
+            // Before displaying, verify user credentials against stored hash
+            const inputHash = hashPassword(password);
+            if (userRecord.passwordHash && userRecord.passwordHash !== inputHash) {
+                return res.status(401).json({ 
+                    error: 'Authentication failed. Incorrect password.' 
+                });
+            }
+
+            // Credentials verified! Display stored attendance backup
+            return res.json({
+                success: true,
+                data: userRecord.data,
+                name: userRecord.name || 'Student',
+                bid: userRecord.bid || '0',
+                isBackup: true,
+                lastUpdated: userRecord.lastUpdated
+            });
+
+        } catch (dbErr) {
+            return res.status(500).json({ 
+                error: 'FISAT Intranet is down and failed to load offline backup: ' + dbErr.message 
+            });
+        }
     }
 });
+
+// --- Periodic 4-Hour Background Update Job ---
+async function syncAllUsersAttendance() {
+    console.log('[4-Hour Sync] Checking for opted-in users to update...');
+    try {
+        const backups = await getBackupsDB();
+        const userKeys = Object.keys(backups);
+        if (userKeys.length === 0) return;
+
+        let updatedCount = 0;
+        for (const username of userKeys) {
+            const user = backups[username];
+            if (!user || !user.optedIn || !user.encryptedPassword) continue;
+
+            try {
+                const plainPassword = decryptPassword(user.encryptedPassword);
+                const { subjects, studentName, bid } = await scrapePortal(username, plainPassword);
+
+                user.data = subjects;
+                user.name = studentName;
+                user.bid = bid;
+                user.lastUpdated = new Date().toISOString();
+                updatedCount++;
+                console.log(`[4-Hour Sync] Updated ${username} (${studentName})`);
+
+                // Rate-limiting delay between requests
+                await new Promise(r => setTimeout(r, 2000));
+            } catch (err) {
+                console.log(`[4-Hour Sync] Skipped ${username} (Portal down or error: ${err.message})`);
+            }
+        }
+
+        if (updatedCount > 0) {
+            await saveBackupsDB(backups);
+            console.log(`[4-Hour Sync] Successfully updated ${updatedCount} users in database.`);
+        }
+    } catch (e) {
+        console.error('[4-Hour Sync] Error during periodic sync:', e.message);
+    }
+}
+
+// Trigger sync every 4 hours (4 * 60 * 60 * 1000 ms)
+const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+setInterval(syncAllUsersAttendance, FOUR_HOURS_MS);
 
 // Timetable Endpoints
 app.post('/api/timetables/extract', async (req, res) => {

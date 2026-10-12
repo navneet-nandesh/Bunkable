@@ -29,6 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     const loginError = document.getElementById('login-error');
     const rememberMeCheckbox = document.getElementById('remember-me');
+    const storeBackupCheckbox = document.getElementById('store-backup');
+    const offlineBackupBanner = document.getElementById('offline-backup-banner');
+    const backupTimestampEl = document.getElementById('backup-timestamp');
+
+    // Restore cloud backup opt-in preference
+    const savedBackupOptin = localStorage.getItem('bunkable_backup_optin');
+    if (savedBackupOptin !== null && storeBackupCheckbox) {
+        storeBackupCheckbox.checked = savedBackupOptin === 'true';
+    }
 
     // Global state for attendance data
     const subjectsData = [];
@@ -63,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const username = document.getElementById('student-id').value;
         const password = document.getElementById('password').value;
+        const storeBackup = storeBackupCheckbox ? storeBackupCheckbox.checked : true;
 
         try {
             // Use local backend for development, or your live Render URL for production!
@@ -73,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${BACKEND_URL}/api/attendance`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, storeBackup })
             });
             
             let result;
@@ -105,6 +115,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     localStorage.removeItem('bunkable_user');
                     localStorage.removeItem('bunkable_pass');
+                }
+
+                // Persist Cloud Backup preference
+                if (storeBackupCheckbox) {
+                    localStorage.setItem('bunkable_backup_optin', storeBackupCheckbox.checked);
+                }
+
+                // Handle Downtime Backup vs Live status
+                if (result.isBackup) {
+                    if (offlineBackupBanner) offlineBackupBanner.classList.remove('hidden');
+                    if (backupTimestampEl) {
+                        if (result.lastUpdated) {
+                            try {
+                                const d = new Date(result.lastUpdated);
+                                backupTimestampEl.innerText = d.toLocaleString(undefined, {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                });
+                            } catch (e) {
+                                backupTimestampEl.innerText = result.lastUpdated;
+                            }
+                        } else {
+                            backupTimestampEl.innerText = 'Recently';
+                        }
+                    }
+                } else {
+                    if (offlineBackupBanner) offlineBackupBanner.classList.add('hidden');
                 }
                 
                 // Transition pages
@@ -140,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear saved credentials when explicitly logging out
         localStorage.removeItem('bunkable_user');
         localStorage.removeItem('bunkable_pass');
+        if (offlineBackupBanner) offlineBackupBanner.classList.add('hidden');
 
         dashboardSection.classList.remove('active');
         setTimeout(() => {

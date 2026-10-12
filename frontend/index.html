@@ -45,10 +45,26 @@
                     <label for="password">Portal Password</label>
                     <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-                <div class="remember-me" style="display: flex; align-items: center; justify-content: flex-start; gap: 10px; margin-top: -5px; margin-bottom: 25px;">
-                    <input type="checkbox" id="remember-me" checked style="width: 18px; height: 18px; padding: 0; margin: 0; accent-color: var(--primary); cursor: pointer;">
-                    <label for="remember-me" style="display: inline-block; color: var(--text-muted); font-weight: 500; font-size: 0.95rem; margin-bottom: 0; cursor: pointer;">Remember me for auto-login</label>
+                <div class="login-options">
+                    <div class="remember-me-row">
+                        <input type="checkbox" id="remember-me" checked>
+                        <label for="remember-me">Remember me for auto-login</label>
+                    </div>
+
+                    <div class="backup-optin-box">
+                        <div class="backup-optin-header">
+                            <input type="checkbox" id="store-backup" checked>
+                            <label for="store-backup" class="backup-optin-label">
+                                <span class="backup-title">Cloud Backup &amp; Sync</span>
+                                <span class="backup-tag">4-Hour Auto-Sync</span>
+                            </label>
+                        </div>
+                        <p class="backup-optin-desc">
+                            Automatically updates attendance every 4 hours so you can still view your stats when the FISAT portal is down. Your password is encrypted and strictly verified.
+                        </p>
+                    </div>
                 </div>
+
                 <button type="submit" class="btn-primary" id="login-btn">
                     <span class="btn-text">Connect to FISAT Portal</span>
                     <div class="spinner hidden"></div>
@@ -61,6 +77,20 @@
 
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="glass-panel hidden">
+            <!-- Intranet Downtime Fallback Notification Banner -->
+            <div id="offline-backup-banner" class="backup-alert-banner hidden">
+                <div class="backup-alert-icon">⚡</div>
+                <div class="backup-alert-text">
+                    <div class="backup-alert-title">
+                        <span>FISAT Intranet Offline</span>
+                        <span class="backup-alert-tag">Verified Snapshot</span>
+                    </div>
+                    <div class="backup-alert-desc">
+                        Showing saved attendance from our secure cloud backup (Last synced: <span id="backup-timestamp">--</span>). Live sync will resume automatically once the intranet is back online.
+                    </div>
+                </div>
+            </div>
+
             <header class="dashboard-header">
                 <div>
                     <h2>Welcome back, <span id="user-name">Student</span>!</h2>
