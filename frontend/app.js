@@ -277,7 +277,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.currentTimetable = JSON.parse(localTT);
             const navBar = document.getElementById('timetable-nav-bar');
             if (navBar) navBar.style.display = 'flex';
-            renderDayTimetable(window.currentTimetable, currentDayOffset);
+            buildWeekDaysTrack();
+            renderDayTimetable(window.currentTimetable, 0);
             return;
         }
 
@@ -291,7 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.currentTimetable = data.timetable;
                 const navBar = document.getElementById('timetable-nav-bar');
                 if (navBar) navBar.style.display = 'flex';
-                renderDayTimetable(data.timetable, currentDayOffset);
+                buildWeekDaysTrack();
+                renderDayTimetable(data.timetable, 0);
             } else {
                 showTimetableMissing();
             }
@@ -301,16 +303,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTodayTimetable(timetable) {
-        renderDayTimetable(timetable, currentDayOffset);
+        renderDayTimetable(timetable, 0);
+    }
+
+    function buildWeekDaysTrack() {
+        const track = document.getElementById('timetable-days-track');
+        if (!track) return;
+
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        let html = '';
+
+        for (let offset = 0; offset <= 7; offset++) {
+            const d = new Date();
+            d.setDate(d.getDate() + offset);
+            const dayIdx = d.getDay();
+            const dayName = dayNames[dayIdx];
+            const dateStr = d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+            let label = '';
+            if (offset === 0) {
+                label = 'Today';
+            } else if (offset === 1) {
+                label = 'Tomorrow';
+            } else if (offset === 7) {
+                label = `Next ${dayName.substr(0, 3)}`;
+            } else {
+                label = dayName.substr(0, 3);
+            }
+
+            const isWeekend = dayIdx === 0 || dayIdx === 6;
+            const weekendIcon = isWeekend ? ' 🎉' : '';
+
+            html += `
+                <button type="button" class="tt-day-pill ${offset === currentDayOffset ? 'active' : ''}" data-offset="${offset}" id="tt-pill-${offset}">
+                    <span class="tt-day-title">${label}${weekendIcon}</span>
+                    <span class="tt-day-date">${dateStr}</span>
+                </button>
+            `;
+        }
+        track.innerHTML = html;
+
+        track.querySelectorAll('.tt-day-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const o = parseInt(btn.dataset.offset, 10);
+                if (!isNaN(o) && window.currentTimetable) {
+                    renderDayTimetable(window.currentTimetable, o);
+                }
+            });
+        });
     }
 
     function renderDayTimetable(timetable, offset = 0) {
+        // Enforce bounds: Today is leftmost (0), and exactly 1 week later is the end (7)
+        offset = Math.max(0, Math.min(7, offset));
         currentDayOffset = offset;
         if (!timetable) return;
         if (typeof renderFullWeek === 'function') renderFullWeek(timetable);
 
         const navBar = document.getElementById('timetable-nav-bar');
         if (navBar) navBar.style.display = 'flex';
+
+        const track = document.getElementById('timetable-days-track');
+        if (track && track.children.length === 0) {
+            buildWeekDaysTrack();
+        }
+
+        // Highlight active day pill
+        document.querySelectorAll('.tt-day-pill').forEach(btn => {
+            const o = parseInt(btn.dataset.offset, 10);
+            btn.classList.toggle('active', o === offset);
+        });
+
+        // Update prev/next arrows state (prev disabled at 0, next disabled at 7)
+        const prevBtn = document.getElementById('tt-prev-btn');
+        const nextBtn = document.getElementById('tt-next-btn');
+        if (prevBtn) prevBtn.disabled = (offset === 0);
+        if (nextBtn) nextBtn.disabled = (offset >= 7);
+
+        const activePill = document.getElementById(`tt-pill-${offset}`);
+        if (activePill && track) {
+            activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
 
         const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const targetDate = new Date();
@@ -319,39 +392,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetDayIdx = targetDate.getDay();
         const targetDayStr = days[targetDayIdx];
         const dayFormatted = targetDayStr.charAt(0).toUpperCase() + targetDayStr.slice(1);
-        const dateFormatted = targetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const dateFormatted = targetDate.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
 
         const titleEl = document.getElementById('timetable-title');
         const badgeEl = document.getElementById('timetable-relative-badge');
         const dayEl = document.getElementById('current-day');
-        const backTodayBtn = document.getElementById('tt-btn-back-today');
-        const todayBtn = document.getElementById('tt-btn-today');
-        const tomorrowBtn = document.getElementById('tt-btn-tomorrow');
-
-        // Update nav buttons active states
-        if (todayBtn) todayBtn.classList.toggle('active', offset === 0);
-        if (tomorrowBtn) tomorrowBtn.classList.toggle('active', offset === 1);
 
         if (offset === 0) {
             if (titleEl) titleEl.innerText = "Today's Classes";
             if (badgeEl) badgeEl.innerText = "Today";
-            if (backTodayBtn) backTodayBtn.style.display = 'none';
         } else if (offset === 1) {
             if (titleEl) titleEl.innerText = "Tomorrow's Classes";
             if (badgeEl) badgeEl.innerText = "Tomorrow";
-            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
-        } else if (offset === -1) {
-            if (titleEl) titleEl.innerText = "Yesterday's Classes";
-            if (badgeEl) badgeEl.innerText = "Yesterday";
-            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
-        } else if (offset > 1) {
-            if (titleEl) titleEl.innerText = `${dayFormatted}'s Classes`;
-            if (badgeEl) badgeEl.innerText = `+${offset} days`;
-            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
+        } else if (offset === 7) {
+            if (titleEl) titleEl.innerText = `Next ${dayFormatted}'s Classes`;
+            if (badgeEl) badgeEl.innerText = "1 week later";
         } else {
             if (titleEl) titleEl.innerText = `${dayFormatted}'s Classes`;
-            if (badgeEl) badgeEl.innerText = `${Math.abs(offset)} days ago`;
-            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
+            if (badgeEl) badgeEl.innerText = `+${offset} days`;
         }
 
         if (dayEl) dayEl.innerText = `${dayFormatted}, ${dateFormatted}`;
@@ -440,41 +498,20 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('setup-timetable-btn').addEventListener('click', openTimetableBuilder);
     }
 
-    // Day navigation event listeners
-    const ttBtnToday = document.getElementById('tt-btn-today');
-    const ttBtnTomorrow = document.getElementById('tt-btn-tomorrow');
-    const ttBtnNext = document.getElementById('tt-btn-next');
-    const ttBtnPrev = document.getElementById('tt-btn-prev');
-    const ttBtnBackToday = document.getElementById('tt-btn-back-today');
+    // Day navigation arrow button listeners (strictly bounded 0 to 7)
+    const prevArrowBtn = document.getElementById('tt-prev-btn');
+    const nextArrowBtn = document.getElementById('tt-next-btn');
 
-    if (ttBtnToday) {
-        ttBtnToday.addEventListener('click', () => {
+    if (prevArrowBtn) {
+        prevArrowBtn.addEventListener('click', () => {
             if (!window.currentTimetable) return;
-            renderDayTimetable(window.currentTimetable, 0);
+            renderDayTimetable(window.currentTimetable, Math.max(0, currentDayOffset - 1));
         });
     }
-    if (ttBtnTomorrow) {
-        ttBtnTomorrow.addEventListener('click', () => {
+    if (nextArrowBtn) {
+        nextArrowBtn.addEventListener('click', () => {
             if (!window.currentTimetable) return;
-            renderDayTimetable(window.currentTimetable, 1);
-        });
-    }
-    if (ttBtnNext) {
-        ttBtnNext.addEventListener('click', () => {
-            if (!window.currentTimetable) return;
-            renderDayTimetable(window.currentTimetable, currentDayOffset + 1);
-        });
-    }
-    if (ttBtnPrev) {
-        ttBtnPrev.addEventListener('click', () => {
-            if (!window.currentTimetable) return;
-            renderDayTimetable(window.currentTimetable, currentDayOffset - 1);
-        });
-    }
-    if (ttBtnBackToday) {
-        ttBtnBackToday.addEventListener('click', () => {
-            if (!window.currentTimetable) return;
-            renderDayTimetable(window.currentTimetable, 0);
+            renderDayTimetable(window.currentTimetable, Math.min(7, currentDayOffset + 1));
         });
     }
 
@@ -645,7 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         days.forEach(day => {
             const targetIdx = dayIndices[day];
-            const offsetDiff = targetIdx - currentTodayIdx;
+            let offsetDiff = targetIdx - currentTodayIdx;
+            if (offsetDiff < 0) offsetDiff += 7;
             html += `<tr><td class="clickable-week-day" data-offset="${offsetDiff}" style="font-weight:bold; color:var(--primary); text-transform:capitalize; cursor:pointer;" title="Click to view ${day}'s classes">${day.substr(0,3)}</td>`;
             for(let i=0; i<8; i++) {
                 const subj = (tt[day] && tt[day][i]) ? tt[day][i] : 'FREE';

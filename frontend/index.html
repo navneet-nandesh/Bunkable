@@ -102,24 +102,16 @@
                     </div>
                 </div>
 
-                <!-- Day Navigation Controls -->
-                <div id="timetable-nav-bar" class="timetable-nav-bar" style="display: none;">
-                    <div class="timetable-nav-group">
-                        <button id="tt-btn-today" class="tt-nav-btn active" type="button" title="View Today's Classes">
-                            <span>📅</span> Today
-                        </button>
-                        <button id="tt-btn-tomorrow" class="tt-nav-btn" type="button" title="View Tomorrow's Classes">
-                            <span>☀️</span> Tomorrow
-                        </button>
-                        <button id="tt-btn-next" class="tt-nav-btn" type="button" title="View Next Day's Classes">
-                            Next Day <span>▶</span>
-                        </button>
-                        <button id="tt-btn-prev" class="tt-nav-btn" type="button" title="View Previous Day's Classes">
-                            <span>◀</span> Prev
-                        </button>
+                <!-- Horizontal Week Bar (Today leftmost to exactly 1 week later) -->
+                <div id="timetable-nav-bar" class="timetable-week-bar" style="display: none;">
+                    <button id="tt-prev-btn" class="tt-arrow-btn" type="button" title="Previous Day" disabled>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <div id="timetable-days-track" class="timetable-days-track">
+                        <!-- 8 Day pills dynamically populated: Day 0 (Today) through Day 7 (1 week later) -->
                     </div>
-                    <button id="tt-btn-back-today" class="tt-nav-btn tt-back-today-btn" type="button" style="display: none;" title="Return to Today's Classes">
-                        <span>↩</span> Back to Today
+                    <button id="tt-next-btn" class="tt-arrow-btn" type="button" title="Next Day">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </button>
                 </div>
 
@@ -204,7 +196,10 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registered!'))
+                    .then(reg => {
+                        console.log('Service Worker registered!');
+                        reg.update();
+                    })
                     .catch(err => console.error('Service Worker registration failed: ', err));
             });
         }

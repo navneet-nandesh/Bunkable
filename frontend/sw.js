@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v17'; // Bumped version to push updates!
+const CACHE_NAME = 'bunkable-v18'; // Bumped version to push updates!
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
   './icon.png'
 ];
 
-// Install event: Cache files
+// Install event: Cache files immediately
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -16,7 +16,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate event: Clean up old caches
+// Activate event: Clean up old caches & take control immediately
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -27,25 +27,27 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch event: Serve from cache if available, else network
+// Fetch event: Network-First strategy for real-time updates, fallback to cache offline
 self.addEventListener('fetch', event => {
-  // Only intercept GET requests (ignore API POSTs)
   if (event.request.method !== 'GET') return;
   
   event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
+    fetch(event.request)
+      .then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        return fetch(event.request).then(response => {
-          // Optional: Add new fetched files to the cache dynamically
-          return response;
-        });
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request);
       })
   );
 });
