@@ -287,6 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const classCounts = {};
+        todayClasses.forEach(cls => {
+            if (cls && cls !== 'FREE') {
+                classCounts[cls] = (classCounts[cls] || 0) + 1;
+            }
+        });
+
         let html = '';
         todayClasses.forEach((cls, i) => {
             if (!cls || cls === 'FREE') return;
@@ -301,9 +308,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newPerc = (subj.attended / (subj.total + 1)) * 100;
                 const newColor = getPercentageColor(newPerc, target);
                 
+                let extraSkipHtml = '';
+                const countToday = classCounts[cls];
+                if (countToday > 1) {
+                    const allSkippedPerc = (subj.attended / (subj.total + countToday)) * 100;
+                    const allSkippedColor = getPercentageColor(allSkippedPerc, target);
+                    extraSkipHtml = `<span style="font-size: 0.75rem; color: var(--text-muted);">If all ${countToday} skipped: <span style="color:${allSkippedColor}; font-weight:600;">${allSkippedPerc.toFixed(1)}%</span></span>`;
+                }
+                
                 percText = `<div style="display:flex; flex-direction:column; align-items:flex-end; gap: 2px;">
                     <span style="color:${color}; font-weight:700;">${perc.toFixed(1)}%</span>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">If skipped: <span style="color:${newColor}; font-weight:600;">${newPerc.toFixed(1)}%</span></span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">If ${countToday > 1 ? '1 ' : ''}skipped: <span style="color:${newColor}; font-weight:600;">${newPerc.toFixed(1)}%</span></span>
+                    ${extraSkipHtml}
                 </div>`;
             }
             html += `<div class="period-item">
