@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v25'; // Kept Edit Labs/Classes strictly inside Timetable views
+const CACHE_NAME = 'bunkable-v26'; // Applied Bricolage Grotesque font to titles, headers, and wordmark
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
