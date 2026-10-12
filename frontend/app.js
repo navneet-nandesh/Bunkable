@@ -420,11 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchTimetable(classIdentifier) {
         const id = classIdentifier || window.currentClassId || window.currentBatchId || 'default';
         
-        // Show all edit options
+        // Show timetable edit buttons in Timetable views
         const editBtns = [
             document.getElementById('edit-timetable-btn'),
-            document.getElementById('edit-timetable-btn-week'),
-            document.getElementById('topheader-edit-btn')
+            document.getElementById('edit-timetable-btn-week')
         ];
         editBtns.forEach(btn => {
             if (btn) btn.style.display = 'inline-flex';
@@ -759,12 +758,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
     }
 
-    // Wire up all "Edit Labs / Classes" triggers across the UI
+    // Wire up "Edit Labs / Classes" triggers in timetable panels
     const editTriggerIds = [
         'edit-timetable-btn',
-        'edit-timetable-btn-week',
-        'sidebar-btn-edit-timetable',
-        'topheader-edit-btn'
+        'edit-timetable-btn-week'
     ];
     editTriggerIds.forEach(id => {
         const el = document.getElementById(id);

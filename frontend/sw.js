@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v24'; // Class timetable isolation + Edit Labs/Classes everywhere
+const CACHE_NAME = 'bunkable-v25'; // Kept Edit Labs/Classes strictly inside Timetable views
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

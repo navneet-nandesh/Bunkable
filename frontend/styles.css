@@ -1291,13 +1291,6 @@ button {
     font-weight: 600;
 }
 
-/* Topheader Right */
-.topheader-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 /* Timetable Empty State */
 .timetable-empty-state {
     text-align: center;
