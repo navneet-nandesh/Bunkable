@@ -155,7 +155,7 @@ async function scrapePortal(username, password) {
         studentName = nameText.split(',')[0].trim();
     }
 
-    // 2. Fetch the Attendance Shell page to find Batch ID (BID)
+    // 2. Fetch the Attendance Shell page to find Batch ID (BID) and Class Code
     const attendanceShellRes = await client.get('https://intranet.fisat.ac.in/index.php/ecampus/attendance');
     const $shell = cheerio.load(attendanceShellRes.data);
     
@@ -165,6 +165,14 @@ async function scrapePortal(username, password) {
     if (!bid) {
         throw new Error('Could not find your current semester data.');
     }
+
+    // Extract exact class identifier (e.g. "S3CS25C - SEMESTER 3" -> "S3CS25C")
+    const rawHeadText = firstTab.text().trim();
+    let classId = rawHeadText.split(/[-–—]/)[0].trim().replace(/\s+/g, '');
+    if (!classId) {
+        classId = bid;
+    }
+    const className = rawHeadText || classId;
 
     // 3. Fetch Attendance Table Data
     const reportPayload = new URLSearchParams();
@@ -188,7 +196,7 @@ async function scrapePortal(username, password) {
         }
     });
 
-    return { subjects, studentName, bid };
+    return { subjects, studentName, bid, classId, className };
 }
 
 // --- Attendance Route with Live Fetch & Fallback ---
@@ -203,14 +211,16 @@ app.post('/api/attendance', async (req, res) => {
 
     try {
         // Attempt live scraping from intranet
-        const { subjects, studentName, bid } = await scrapePortal(cleanUsername, password);
+        const { subjects, studentName, bid, classId, className } = await scrapePortal(cleanUsername, password);
 
-        // Intranet is up and running! Return live data directly
+        // Intranet is up and running! Return live data directly with class info
         res.json({ 
             success: true, 
             data: subjects, 
             name: studentName, 
             bid: bid,
+            classId: classId,
+            className: className,
             isBackup: false 
         });
 
@@ -225,12 +235,14 @@ app.post('/api/attendance', async (req, res) => {
                         passwordHash: hashPassword(password),
                         name: studentName,
                         bid: bid,
+                        classId: classId,
+                        className: className,
                         data: subjects,
                         lastUpdated: new Date().toISOString(),
                         optedIn: true
                     };
                     await saveBackupsDB(backups);
-                    console.log(`[Backup DB] Saved attendance & credentials for ${cleanUsername}`);
+                    console.log(`[Backup DB] Saved attendance & credentials for ${cleanUsername} (${classId})`);
                 } catch (saveErr) {
                     console.error('[Backup DB] Failed to save backup for user:', saveErr.message);
                 }
@@ -271,6 +283,8 @@ app.post('/api/attendance', async (req, res) => {
                 data: userRecord.data,
                 name: userRecord.name || 'Student',
                 bid: userRecord.bid || '0',
+                classId: userRecord.classId || userRecord.bid || '0',
+                className: userRecord.className || '',
                 isBackup: true,
                 lastUpdated: userRecord.lastUpdated
             });
@@ -298,14 +312,16 @@ async function syncAllUsersAttendance() {
 
             try {
                 const plainPassword = decryptPassword(user.encryptedPassword);
-                const { subjects, studentName, bid } = await scrapePortal(username, plainPassword);
+                const { subjects, studentName, bid, classId, className } = await scrapePortal(username, plainPassword);
 
                 user.data = subjects;
                 user.name = studentName;
                 user.bid = bid;
+                user.classId = classId;
+                user.className = className;
                 user.lastUpdated = new Date().toISOString();
                 updatedCount++;
-                console.log(`[4-Hour Sync] Updated ${username} (${studentName})`);
+                console.log(`[4-Hour Sync] Updated ${username} (${studentName} - ${classId})`);
 
                 // Rate-limiting delay between requests
                 await new Promise(r => setTimeout(r, 2000));
@@ -378,7 +394,7 @@ Do NOT include markdown formatting like \`\`\`json. Return only the raw JSON obj
     }
 });
 
-app.get('/api/timetables/:bid', async (req, res) => {
+app.get('/api/timetables/:id', async (req, res) => {
     if (!GIST_ID || !process.env.GITHUB_TOKEN) return res.status(500).json({ error: 'DB not ready' });
     try {
         const response = await axios.get(`https://api.github.com/gists/${GIST_ID}`, {
@@ -386,13 +402,21 @@ app.get('/api/timetables/:bid', async (req, res) => {
         });
         const content = response.data.files['timetables.json'].content;
         const db = JSON.parse(content);
-        res.json({ success: true, timetable: db[req.params.bid] || null });
+        const reqId = String(req.params.id).trim();
+
+        let tt = db[reqId] || null;
+        // Backward compatibility: If classId is S3CS25C and not found yet, check legacy '3410' key
+        if (!tt && (reqId.toUpperCase() === 'S3CS25C' || reqId === '3410')) {
+            tt = db['S3CS25C'] || db['3410'] || null;
+        }
+
+        res.json({ success: true, timetable: tt });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch timetable' });
     }
 });
 
-app.post('/api/timetables/:bid', async (req, res) => {
+app.post('/api/timetables/:id', async (req, res) => {
     if (!GIST_ID || !process.env.GITHUB_TOKEN) return res.status(500).json({ error: 'DB not ready' });
     try {
         // Fetch current DB
@@ -400,9 +424,13 @@ app.post('/api/timetables/:bid', async (req, res) => {
             headers: { Authorization: `token ${process.env.GITHUB_TOKEN}` }
         });
         const db = JSON.parse(getRes.data.files['timetables.json'].content);
+        const reqId = String(req.params.id).trim();
         
-        // Update DB
-        db[req.params.bid] = req.body.timetable;
+        // Update DB strictly for this specific class
+        db[reqId] = req.body.timetable;
+        if (reqId.toUpperCase() === 'S3CS25C') {
+            db['3410'] = req.body.timetable; // Keep synced for legacy clients
+        }
         
         // Save back to Gist
         await axios.patch(`https://api.github.com/gists/${GIST_ID}`, {

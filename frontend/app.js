@@ -177,11 +177,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('user-name').innerText = result.name;
                 }
                 
-                // Fetch Timetable from Cloud
-                if (result.bid) {
-                    window.currentBatchId = result.bid;
-                    fetchTimetable(result.bid);
+                // Store user, batch, and class info
+                window.currentUsername = username;
+                window.currentBatchId = result.bid || '0';
+                window.currentClassId = result.classId || result.bid || 'default';
+                window.currentClassName = result.className || result.classId || '';
+
+                // Update UI elements showing class
+                const classBadge = document.getElementById('topheader-class-badge');
+                if (classBadge) {
+                    classBadge.innerText = window.currentClassId ? `Class: ${window.currentClassId}` : '';
+                    classBadge.style.display = window.currentClassId ? 'inline-flex' : 'none';
                 }
+                const userClassTag = document.getElementById('user-class-tag');
+                if (userClassTag && window.currentClassId) {
+                    userClassTag.innerText = window.currentClassId;
+                }
+                const ttClassPill = document.getElementById('timetable-class-pill');
+                if (ttClassPill) {
+                    ttClassPill.innerText = window.currentClassId;
+                    ttClassPill.style.display = 'inline-flex';
+                }
+                const modalClassBadge = document.getElementById('modal-class-badge');
+                if (modalClassBadge) {
+                    modalClassBadge.innerText = window.currentClassName || window.currentClassId;
+                }
+                
+                // Fetch Timetable strictly for this student's class
+                fetchTimetable(window.currentClassId);
 
                 // Save credentials if Remember Me is checked
                 if (rememberMeCheckbox && rememberMeCheckbox.checked) {
@@ -256,6 +279,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Clear saved credentials when explicitly logging out
         localStorage.removeItem('bunkable_user');
         localStorage.removeItem('bunkable_pass');
+        window.currentUsername = null;
+        window.currentClassId = null;
+        window.currentClassName = null;
+        window.currentTimetable = null;
+
+        const classBadge = document.getElementById('topheader-class-badge');
+        if (classBadge) classBadge.style.display = 'none';
+        const ttClassPill = document.getElementById('timetable-class-pill');
+        if (ttClassPill) ttClassPill.style.display = 'none';
+
         if (offlineBackupBanner) offlineBackupBanner.classList.add('hidden');
         switchPage('attendance');
 
@@ -384,27 +417,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Timetable Logic ---
     let currentDayOffset = 0;
 
-    async function fetchTimetable(bid) {
-        document.getElementById('edit-timetable-btn').style.display = 'block';
+    async function fetchTimetable(classIdentifier) {
+        const id = classIdentifier || window.currentClassId || window.currentBatchId || 'default';
+        
+        // Show all edit options
+        const editBtns = [
+            document.getElementById('edit-timetable-btn'),
+            document.getElementById('edit-timetable-btn-week'),
+            document.getElementById('topheader-edit-btn')
+        ];
+        editBtns.forEach(btn => {
+            if (btn) btn.style.display = 'inline-flex';
+        });
+
         const shareBtn = document.getElementById('share-timetable-btn');
         if (shareBtn) shareBtn.style.display = 'inline-flex';
         
-        // 1. Check for personal local override
-        const localTT = localStorage.getItem('bunkable_timetable');
-        if (localTT) {
-            window.currentTimetable = JSON.parse(localTT);
-            const navBar = document.getElementById('timetable-nav-bar');
-            if (navBar) navBar.style.display = 'flex';
-            buildWeekDaysTrack();
-            renderDayTimetable(window.currentTimetable, 0);
-            return;
+        // 1. Check for personal local override SCOPED TO THIS CLASS
+        const scopedKey = `bunkable_timetable_${id}`;
+        let localTT = localStorage.getItem(scopedKey);
+        
+        // Backward compatibility for existing S3CS25C saved under generic key
+        if (!localTT && (String(id).toUpperCase() === 'S3CS25C' || id === '3410')) {
+            localTT = localStorage.getItem('bunkable_timetable');
         }
 
-        // 2. Otherwise fetch from cloud
+        if (localTT) {
+            try {
+                window.currentTimetable = JSON.parse(localTT);
+                const navBar = document.getElementById('timetable-nav-bar');
+                if (navBar) navBar.style.display = 'flex';
+                buildWeekDaysTrack();
+                renderDayTimetable(window.currentTimetable, 0);
+                return;
+            } catch (err) {
+                console.error('Invalid local timetable data:', err);
+            }
+        }
+
+        // 2. Otherwise fetch from cloud for this specific class
         const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
         try {
-            const res = await fetch(`${BACKEND_URL}/api/timetables/${bid}`);
+            const res = await fetch(`${BACKEND_URL}/api/timetables/${encodeURIComponent(id)}`);
             const data = await res.json();
             if (data.success && data.timetable) {
                 window.currentTimetable = data.timetable;
@@ -416,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showTimetableMissing();
             }
         } catch (e) {
-            document.getElementById('timetable-content').innerHTML = `<p style="color:var(--danger)">Failed to load timetable from cloud.</p>`;
+            showTimetableMissing();
         }
     }
 
@@ -604,16 +659,55 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('timetable-content').innerHTML = html || `<p style="text-align:center; color: var(--text-muted);">Free day! 🎉</p>`;
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+        })[m]);
+    }
+
     function showTimetableMissing() {
+        window.currentTimetable = null;
         const navBar = document.getElementById('timetable-nav-bar');
         if (navBar) navBar.style.display = 'none';
+        const fullWeekSec = document.getElementById('full-week-section');
+        if (fullWeekSec) fullWeekSec.classList.add('hidden');
+
+        const classNameDisplay = window.currentClassName || window.currentClassId || 'your class';
+        const classCode = window.currentClassId || 'your class';
+
         document.getElementById('timetable-content').innerHTML = `
-            <div style="text-align:center; padding: 10px;">
-                <p style="margin-bottom:15px; color:var(--text-muted); font-size: 0.95rem;">No cloud timetable exists for your batch yet.</p>
-                <button id="setup-timetable-btn" class="btn-primary" style="padding: 12px; font-size: 0.95rem; width: auto; margin: 0 auto;">Setup Timetable for Everyone</button>
+            <div class="timetable-empty-state">
+                <div class="empty-state-icon">📅</div>
+                <h4 class="empty-state-title">No Timetable Uploaded Yet</h4>
+                <p class="empty-state-desc">
+                    No one in <strong style="color: var(--accent);">${escapeHtml(classNameDisplay)}</strong> has uploaded a timetable to the cloud database yet.
+                </p>
+                <p class="empty-state-sub">
+                    Upload your class timetable photo or set it up manually so everyone in <strong>${escapeHtml(classCode)}</strong> can view today's periods and attendance predictions!
+                </p>
+                <div class="empty-state-actions">
+                    <button id="empty-ai-upload-btn" class="btn-primary" type="button" style="margin-top:0; width:auto; padding: 10px 18px;">
+                        ✨ Upload Timetable Photo (AI)
+                    </button>
+                    <button id="setup-timetable-btn" class="btn-secondary" type="button" style="width:auto; padding: 10px 18px;">
+                        ✏️ Build Timetable Manually
+                    </button>
+                </div>
             </div>
         `;
-        document.getElementById('setup-timetable-btn').addEventListener('click', openTimetableBuilder);
+
+        const emptyAiBtn = document.getElementById('empty-ai-upload-btn');
+        if (emptyAiBtn) {
+            emptyAiBtn.addEventListener('click', () => {
+                const uploadInput = document.getElementById('ai-timetable-upload');
+                if (uploadInput) uploadInput.click();
+            });
+        }
+        const setupBtn = document.getElementById('setup-timetable-btn');
+        if (setupBtn) {
+            setupBtn.addEventListener('click', openTimetableBuilder);
+        }
     }
 
     // Day navigation arrow button listeners (strictly bounded 0 to 7)
@@ -633,13 +727,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('edit-timetable-btn').addEventListener('click', openTimetableBuilder);
-
     function openTimetableBuilder() {
         const modal = document.getElementById('timetable-modal');
+        if (!modal) return;
         const builder = document.getElementById('timetable-builder');
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
         
+        const badge = document.getElementById('modal-class-badge');
+        if (badge) {
+            badge.innerText = window.currentClassName || window.currentClassId || 'Class Schedule';
+        }
+
         const tt = window.currentTimetable || {};
 
         let html = '';
@@ -652,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `<select class="builder-select" data-day="${day}" data-period="${i}">
                     <option value="FREE" ${selectedVal === 'FREE' ? 'selected' : ''}>-- Free Period --</option>`;
                 subjectsData.forEach(s => {
-                    html += `<option value="${s.name}" ${selectedVal === s.name ? 'selected' : ''}>${s.name}</option>`;
+                    html += `<option value="${escapeHtml(s.name)}" ${selectedVal === s.name ? 'selected' : ''}>${escapeHtml(s.name)}</option>`;
                 });
                 html += `</select>`;
             }
@@ -661,88 +759,128 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('hidden');
     }
 
-    document.getElementById('ai-upload-btn').addEventListener('click', () => {
-        document.getElementById('ai-timetable-upload').click();
-    });
-
-    document.getElementById('ai-timetable-upload').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const btn = document.getElementById('ai-upload-btn');
-        const originalText = btn.innerText;
-        btn.innerText = '✨ AI is reading image...';
-        btn.disabled = true;
-
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            const imageBase64 = reader.result;
-            const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
-            
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/timetables/extract`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64,
-                        subjects: subjectsData.map(s => s.name)
-                    })
-                });
-                
-                const data = await res.json();
-                if (data.success && data.timetable) {
-                    // Auto-fill the select boxes
-                    const tt = data.timetable;
-                    document.querySelectorAll('.builder-select').forEach(select => {
-                        const day = select.dataset.day;
-                        const period = select.dataset.period;
-                        if (tt[day] && tt[day][period]) {
-                            const val = tt[day][period];
-                            if (Array.from(select.options).some(opt => opt.value === val)) {
-                                select.value = val;
-                            } else {
-                                select.value = 'FREE';
-                            }
-                        }
-                    });
-                    alert('✨ Timetable successfully imported by AI! Please verify the entries before publishing.');
-                } else {
-                    alert('AI Error: ' + (data.error || 'Failed to parse image.') + '\n\nDetails: ' + JSON.stringify(data.details || ''));
-                }
-            } catch (err) {
-                alert('Connection error during AI extraction.');
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                e.target.value = ''; // reset file input
-            }
-        };
-        reader.readAsDataURL(file);
-    });
-
-    document.getElementById('cancel-timetable').addEventListener('click', () => {
-        document.getElementById('timetable-modal').classList.add('hidden');
-    });
-
-    document.getElementById('share-timetable-btn').addEventListener('click', () => {
-        if (!window.currentTimetable) {
-            alert('No timetable available to share.');
-            return;
+    // Wire up all "Edit Labs / Classes" triggers across the UI
+    const editTriggerIds = [
+        'edit-timetable-btn',
+        'edit-timetable-btn-week',
+        'sidebar-btn-edit-timetable',
+        'topheader-edit-btn'
+    ];
+    editTriggerIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('click', openTimetableBuilder);
         }
-        const encoded = btoa(JSON.stringify(window.currentTimetable));
-        const shareUrl = `${window.location.origin}${window.location.pathname}?tt=${encoded}`;
-        
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            const btn = document.getElementById('share-timetable-btn');
-            const originalHtml = btn.innerHTML;
-            btn.innerHTML = 'Link Copied! ✅';
-            setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
-        }).catch(err => {
-            alert('Failed to copy link. Check console for URL.');
-            console.log('Share URL:', shareUrl);
-        });
     });
+
+    const aiUploadBtn = document.getElementById('ai-upload-btn');
+    if (aiUploadBtn) {
+        aiUploadBtn.addEventListener('click', () => {
+            document.getElementById('ai-timetable-upload').click();
+        });
+    }
+
+    const aiFileInput = document.getElementById('ai-timetable-upload');
+    if (aiFileInput) {
+        aiFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const btn = document.getElementById('ai-upload-btn');
+            const originalText = btn ? btn.innerText : 'Upload Timetable Photo';
+            if (btn) {
+                btn.innerText = '✨ AI is reading image...';
+                btn.disabled = true;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const imageBase64 = reader.result;
+                const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                    ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
+                
+                try {
+                    const res = await fetch(`${BACKEND_URL}/api/timetables/extract`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            imageBase64,
+                            subjects: subjectsData.map(s => s.name)
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.success && data.timetable) {
+                        openTimetableBuilder(); // Make sure builder is open
+                        // Auto-fill the select boxes
+                        const tt = data.timetable;
+                        document.querySelectorAll('.builder-select').forEach(select => {
+                            const day = select.dataset.day;
+                            const period = select.dataset.period;
+                            if (tt[day] && tt[day][period]) {
+                                const val = tt[day][period];
+                                if (Array.from(select.options).some(opt => opt.value === val)) {
+                                    select.value = val;
+                                } else {
+                                    select.value = 'FREE';
+                                }
+                            }
+                        });
+                        alert('✨ Timetable successfully imported by AI! Please verify the entries and click "Publish to Class" or "Save (Just me)".');
+                    } else {
+                        alert('AI Error: ' + (data.error || 'Failed to parse image.') + '\n\nDetails: ' + JSON.stringify(data.details || ''));
+                    }
+                } catch (err) {
+                    alert('Connection error during AI extraction.');
+                } finally {
+                    if (btn) {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                    e.target.value = ''; // reset file input
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    const cancelModalBtn = document.getElementById('cancel-timetable');
+    if (cancelModalBtn) {
+        cancelModalBtn.addEventListener('click', () => {
+            const modal = document.getElementById('timetable-modal');
+            if (modal) modal.classList.add('hidden');
+        });
+    }
+
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            const modal = document.getElementById('timetable-modal');
+            if (modal) modal.classList.add('hidden');
+        });
+    }
+
+    const shareTimetableBtn = document.getElementById('share-timetable-btn');
+    if (shareTimetableBtn) {
+        shareTimetableBtn.addEventListener('click', () => {
+            if (!window.currentTimetable) {
+                alert('No timetable available to share.');
+                return;
+            }
+            const encoded = btoa(JSON.stringify(window.currentTimetable));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?tt=${encoded}`;
+            
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                const btn = document.getElementById('share-timetable-btn');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = 'Link Copied! ✅';
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+            }).catch(err => {
+                alert('Failed to copy link. Check console for URL.');
+                console.log('Share URL:', shareUrl);
+            });
+        });
+    }
 
     function getBuilderTimetable() {
         const timetable = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[] };
@@ -753,38 +891,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return timetable;
     }
 
-    document.getElementById('save-local-timetable').addEventListener('click', () => {
-        const timetable = getBuilderTimetable();
-        localStorage.setItem('bunkable_timetable', JSON.stringify(timetable));
-        window.currentTimetable = timetable;
-        document.getElementById('timetable-modal').classList.add('hidden');
-        renderTodayTimetable(timetable);
-    });
-
-    document.getElementById('save-timetable').addEventListener('click', async (e) => {
-        const btn = e.target;
-        btn.innerText = 'Publishing...';
-        
-        const timetable = getBuilderTimetable();
-        window.currentTimetable = timetable;
-
-        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
-        
-        try {
-            await fetch(`${BACKEND_URL}/api/timetables/${window.currentBatchId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ timetable })
-            });
-            document.getElementById('timetable-modal').classList.add('hidden');
+    const saveLocalBtn = document.getElementById('save-local-timetable');
+    if (saveLocalBtn) {
+        saveLocalBtn.addEventListener('click', () => {
+            const timetable = getBuilderTimetable();
+            const classId = window.currentClassId || window.currentBatchId || 'default';
+            // Save scoped strictly to this class
+            localStorage.setItem(`bunkable_timetable_${classId}`, JSON.stringify(timetable));
+            window.currentTimetable = timetable;
+            const modal = document.getElementById('timetable-modal');
+            if (modal) modal.classList.add('hidden');
             renderTodayTimetable(timetable);
-        } catch (e) {
-            alert('Failed to save to cloud. Please check your connection.');
-        } finally {
-            btn.innerText = 'Publish to Cloud';
-        }
-    });
+            alert(`Personal timetable overrides saved for class ${classId}! Your customized lab periods are now active on this device.`);
+        });
+    }
+
+    const saveTimetableBtn = document.getElementById('save-timetable');
+    if (saveTimetableBtn) {
+        saveTimetableBtn.addEventListener('click', async (e) => {
+            const btn = e.target;
+            const originalText = btn.innerText;
+            btn.innerText = 'Publishing...';
+            btn.disabled = true;
+            
+            const timetable = getBuilderTimetable();
+            window.currentTimetable = timetable;
+            const classId = window.currentClassId || window.currentBatchId || 'default';
+
+            const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                    ? 'http://localhost:3000' : 'https://bunkable-3.onrender.com';
+            
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/timetables/${encodeURIComponent(classId)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ timetable })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // Also cache locally for this class
+                    localStorage.setItem(`bunkable_timetable_${classId}`, JSON.stringify(timetable));
+                    const modal = document.getElementById('timetable-modal');
+                    if (modal) modal.classList.add('hidden');
+                    renderTodayTimetable(timetable);
+                    alert(`🎉 Timetable successfully published for class ${classId}! Everyone in ${classId} can now see it.`);
+                } else {
+                    alert('Failed to publish timetable: ' + (data.error || 'Server error'));
+                }
+            } catch (err) {
+                alert('Failed to connect to server. Please check your network connection.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    }
 
     // --- Full Week View Logic ---
     window.renderFullWeek = function(tt) {

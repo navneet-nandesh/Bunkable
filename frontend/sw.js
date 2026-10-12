@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v23'; // Restored lime green color scheme + bigger target
+const CACHE_NAME = 'bunkable-v24'; // Class timetable isolation + Edit Labs/Classes everywhere
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
