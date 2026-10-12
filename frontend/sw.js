@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v21'; // Bumped version for GitHub-style header & UnderlineNav!
+const CACHE_NAME = 'bunkable-v22'; // Render-style dashboard redesign!
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

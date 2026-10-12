@@ -47,7 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
     targetInput.addEventListener('input', updateDashboard);
     logoutBtn.addEventListener('click', handleLogout);
 
-    // --- Multi-Page Navigation Logic (GitHub-Style UnderlineNav) ---
+    // --- Multi-Page Navigation Logic (Sidebar) ---
+    const pageTitles = {
+        attendance: 'Attendance Overview',
+        timetable: 'Class Timetable',
+        planner: 'Bunk Planner & Simulator'
+    };
+
     function switchPage(pageName) {
         const pages = document.querySelectorAll('.dashboard-page');
         pages.forEach(p => {
@@ -60,23 +66,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Sync GitHub UnderlineNav Tabs
-        document.querySelectorAll('.UnderlineNav-item').forEach(tab => {
-            if (tab.dataset.page === pageName) {
-                tab.classList.add('active');
-                tab.setAttribute('aria-current', 'page');
+        // Sync Sidebar Nav Items
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            if (item.dataset.page === pageName) {
+                item.classList.add('active');
             } else {
-                tab.classList.remove('active');
-                tab.removeAttribute('aria-current');
+                item.classList.remove('active');
             }
         });
+
+        // Update top header page title
+        const titleEl = document.getElementById('topheader-page-title');
+        if (titleEl && pageTitles[pageName]) {
+            titleEl.textContent = pageTitles[pageName];
+        }
+
+        // Close mobile sidebar if open
+        const sidebar = document.getElementById('dash-sidebar');
+        const overlay = document.getElementById('mobile-sidebar-overlay');
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.add('hidden');
 
         // Scroll gracefully to top of page content
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Attach click events for GitHub UnderlineNav tabs
-    document.querySelectorAll('.UnderlineNav-item').forEach(btn => {
+    // Attach click events for Sidebar nav items
+    document.querySelectorAll('.sidebar-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const pageName = e.currentTarget.dataset.page;
             if (pageName) {
@@ -84,6 +100,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileSidebarOverlay = document.getElementById('mobile-sidebar-overlay');
+    const dashSidebar = document.getElementById('dash-sidebar');
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', () => {
+            dashSidebar.classList.toggle('open');
+            mobileSidebarOverlay.classList.toggle('hidden');
+        });
+    }
+
+    if (mobileSidebarOverlay) {
+        mobileSidebarOverlay.addEventListener('click', () => {
+            dashSidebar.classList.remove('open');
+            mobileSidebarOverlay.classList.add('hidden');
+        });
+    }
 
     // Auto-login logic
     const savedUser = localStorage.getItem('bunkable_user');
@@ -136,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Populate data
                 subjectsData.length = 0;
                 subjectsData.push(...result.data);
-                const ghCounter = document.getElementById('gh-counter-attendance');
-                if (ghCounter) ghCounter.innerText = subjectsData.length;
+                const sidebarBadge = document.getElementById('sidebar-badge-attendance');
+                if (sidebarBadge) sidebarBadge.innerText = subjectsData.length;
                 if (result.name) {
                     document.getElementById('user-name').innerText = result.name;
                 }

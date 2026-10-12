@@ -8,33 +8,26 @@
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#d4ff2a">
+    <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Outfit:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="background-elements">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
-
-    <main class="container">
-        <!-- Login Section -->
-        <section id="login-section" class="glass-panel active">
-            <div class="logo"
-                style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 2rem;">
-                <img src="icon.png" alt="Bunkable Icon" width="60" height="60" style="object-fit: contain;">
-                <h1
-                    style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 3.5rem; font-weight: 700; letter-spacing: -0.05em; color: var(--text-main); margin: 0;">
-                    Bunkable</h1>
+    <!-- Login Section (standalone, no sidebar) -->
+    <section id="login-section" class="login-wrapper active">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="icon.png" alt="Bunkable Icon" width="48" height="48">
+                <h1>Bunkable</h1>
             </div>
+            <p class="login-subtitle">Connect to your FISAT Intranet portal</p>
 
             <form id="login-form">
                 <div class="input-group">
@@ -56,84 +49,117 @@
                             <input type="checkbox" id="store-backup" checked>
                             <label for="store-backup" class="backup-optin-label">
                                 <span class="backup-title">Cloud Backup &amp; Sync</span>
-                                <span class="backup-tag">4-Hour Auto-Sync</span>
+                                <span class="backup-tag">Auto-Sync</span>
                             </label>
                         </div>
                         <p class="backup-optin-desc">
-                            Automatically updates attendance every 4 hours so you can still view your stats when the FISAT portal is down. Your password is encrypted and strictly verified.
+                            Automatically updates attendance every 4 hours so you can still view your stats when the FISAT portal is down.
                         </p>
                     </div>
                 </div>
 
                 <button type="submit" class="btn-primary" id="login-btn">
-                    <span class="btn-text">Connect to FISAT Portal</span>
+                    <span class="btn-text">Connect to Portal</span>
                     <div class="spinner hidden"></div>
                 </button>
                 <div id="login-error" class="hidden"
-                    style="color: var(--danger); text-align: center; margin-top: 1rem; font-size: 0.95rem; font-weight: 500;">
+                    style="color: #f87171; text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 500;">
                 </div>
             </form>
-        </section>
+        </div>
+    </section>
 
-        <!-- Dashboard Section -->
-        <section id="dashboard-section" class="glass-panel hidden dashboard-container">
-            
-            <!-- GitHub-Style Header & UnderlineNav -->
-            <header class="gh-header" id="app-nav-bar">
-                <div class="gh-header-inner">
-                    <div class="gh-header-left">
-                        <div class="gh-brand-icon">
-                            <img src="icon.png" alt="Bunkable" width="26" height="26" class="gh-logo">
-                        </div>
-                        <div class="gh-repo-breadcrumb">
-                            <span class="gh-owner">student</span>
-                            <span class="gh-slash">/</span>
-                            <strong class="gh-repo">bunkable</strong>
-                            <span class="gh-badge">Public</span>
-                        </div>
-                    </div>
+    <!-- Dashboard Section -->
+    <section id="dashboard-section" class="dash-shell hidden">
+        
+        <!-- Sidebar -->
+        <aside class="dash-sidebar" id="dash-sidebar">
+            <div class="sidebar-brand">
+                <img src="icon.png" alt="Bunkable" width="28" height="28" class="sidebar-logo">
+                <span class="sidebar-brand-text">Bunkable</span>
+            </div>
 
-                    <div class="gh-header-right">
-                        <div class="gh-target-control" title="Set Minimum Target Attendance">
-                            <label for="target-attendance" class="gh-target-label">Target</label>
-                            <div class="gh-target-input-wrap">
-                                <input type="number" id="target-attendance" value="75" min="50" max="100">
-                                <span class="gh-target-pct">%</span>
-                            </div>
-                        </div>
-
-                        <div class="gh-user-chip" title="Active Student">
-                            <span class="gh-avatar">👤</span>
-                            <span id="user-name" class="gh-username">Student</span>
-                        </div>
-
-                        <button id="logout-btn" class="gh-btn-signout" type="button" title="Sign out">
-                            <svg class="octicon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 3.97-1.97-1.97a.75.75 0 1 1 1.06-1.06l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 1 1-1.06-1.06l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"/></svg>
-                            <span>Sign out</span>
-                        </button>
-                    </div>
+            <nav class="sidebar-nav">
+                <div class="sidebar-group">
+                    <span class="sidebar-group-label">Dashboard</span>
+                    <button type="button" class="sidebar-item active" data-page="attendance" id="nav-btn-attendance">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.53 9.53a.75.75 0 0 1-1.06-1.06l3-3a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.75.75 0 0 1 1.06 1.06Z"/></svg>
+                        <span>Attendance</span>
+                        <span class="sidebar-badge" id="sidebar-badge-attendance">--</span>
+                    </button>
+                    <button type="button" class="sidebar-item" data-page="timetable" id="nav-btn-timetable">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"/></svg>
+                        <span>Timetable</span>
+                    </button>
+                    <button type="button" class="sidebar-item" data-page="planner" id="nav-btn-planner">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11.93 8.5a4.002 4.002 0 0 1-7.86 0H.75a.75.75 0 0 1 0-1.5h3.32a4.002 4.002 0 0 1 7.86 0h3.32a.75.75 0 0 1 0 1.5Zm-1.43-.25a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"/></svg>
+                        <span>Bunk Planner</span>
+                    </button>
                 </div>
 
-                <!-- GitHub UnderlineNav Tab Strip -->
-                <nav class="UnderlineNav" aria-label="Repository Navigation">
-                    <div class="UnderlineNav-body">
-                        <button type="button" class="UnderlineNav-item active" data-page="attendance" id="nav-btn-attendance">
-                            <svg class="octicon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.53 9.53a.75.75 0 0 1-1.06-1.06l3-3a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.75.75 0 0 1 1.06 1.06Z"/></svg>
-                            <span>Attendance</span>
-                            <span class="Counter" id="gh-counter-attendance">--</span>
-                        </button>
-                        <button type="button" class="UnderlineNav-item" data-page="timetable" id="nav-btn-timetable">
-                            <svg class="octicon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"/></svg>
-                            <span>Timetable</span>
-                            <span class="Counter">Week</span>
-                        </button>
-                        <button type="button" class="UnderlineNav-item" data-page="planner" id="nav-btn-planner">
-                            <svg class="octicon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.5 5.396V2.5a.75.75 0 0 1 1.5 0v5.5a.75.75 0 0 1-1.28.53L7.177 5.987a.25.25 0 0 1 0-.354ZM3 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm0 9.5a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm8.25-1.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5Zm0-1.5a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z"/></svg>
-                            <span>Bunk Planner</span>
-                            <span class="Counter">Sim</span>
-                        </button>
+                <div class="sidebar-group">
+                    <span class="sidebar-group-label">Settings</span>
+                    <div class="sidebar-target-control">
+                        <label for="target-attendance" class="sidebar-target-label">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm0 12.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11Zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm0 5.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></svg>
+                            Target %
+                        </label>
+                        <div class="sidebar-target-input-wrap">
+                            <input type="number" id="target-attendance" value="75" min="50" max="100">
+                            <span class="sidebar-target-pct">%</span>
+                        </div>
                     </div>
-                </nav>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="sidebar-avatar">👤</div>
+                    <div class="sidebar-user-info">
+                        <span id="user-name" class="sidebar-username">Student</span>
+                        <span class="sidebar-user-role">FISAT Portal</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="sidebar-signout" type="button" title="Sign out">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 3.97-1.97-1.97a.75.75 0 1 1 1.06-1.06l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 1 1-1.06-1.06l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"/></svg>
+                    <span>Sign out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mobile Top Bar -->
+        <div class="mobile-topbar" id="mobile-topbar">
+            <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Toggle menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="mobile-brand">
+                <img src="icon.png" alt="B" width="22" height="22">
+                <span>Bunkable</span>
+            </div>
+            <div class="mobile-user-chip">
+                <span id="mobile-user-name">👤</span>
+            </div>
+        </div>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="mobile-sidebar-overlay hidden" id="mobile-sidebar-overlay"></div>
+
+        <!-- Main Content Area -->
+        <main class="dash-main">
+            <!-- Service Header (Breadcrumb-style) -->
+            <header class="dash-topheader">
+                <div class="topheader-left">
+                    <div class="topheader-service-badge">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="topheader-icon"><path d="M1.5 1.75V13.5h13.75a.75.75 0 0 1 0 1.5H.75a.75.75 0 0 1-.75-.75V1.75a.75.75 0 0 1 1.5 0Zm14.28 2.53-5.25 5.25a.75.75 0 0 1-1.06 0L7 7.06 4.53 9.53a.75.75 0 0 1-1.06-1.06l3-3a.75.75 0 0 1 1.06 0L10 7.94l4.72-4.72a.75.75 0 0 1 1.06 1.06Z"/></svg>
+                        <span class="topheader-service-name" id="topheader-page-title">Attendance Overview</span>
+                    </div>
+                    <div class="topheader-badges">
+                        <span class="badge badge-live" id="topheader-status-badge">
+                            <span class="badge-dot"></span>
+                            Live
+                        </span>
+                    </div>
+                </div>
             </header>
 
             <!-- Intranet Downtime Fallback Notification Banner -->
@@ -145,74 +171,78 @@
                         <span class="backup-alert-tag">Verified Snapshot</span>
                     </div>
                     <div class="backup-alert-desc">
-                        Showing saved attendance from our secure cloud backup (Last synced: <span id="backup-timestamp">--</span>). Live sync will resume automatically once the intranet is back online.
+                        Showing saved attendance from cloud backup (Last synced: <span id="backup-timestamp">--</span>). Live sync will resume automatically.
                     </div>
                 </div>
             </div>
 
-            <div class="dashboard-pages-container">
+            <div class="dash-content">
                 <!-- Page 1: Attendance & Course Analytics -->
                 <div id="page-attendance" class="dashboard-page active">
-                    <header class="dashboard-header">
-                        <div>
-                            <h2>Attendance Analytics</h2>
-                            <p class="subtitle">Live status and safe bunk margins for every subject.</p>
-                        </div>
-                    </header>
 
-                    <div class="stats-overview" style="margin-bottom: 2.2rem;">
+                    <div class="stats-row">
                         <div class="stat-card">
-                            <h3>Overall Attendance</h3>
-                            <div class="stat-value" id="overall-percentage">0%</div>
+                            <div class="stat-card-inner">
+                                <div class="stat-label">Overall Attendance</div>
+                                <div class="stat-value" id="overall-percentage">0%</div>
+                            </div>
+                            <div class="stat-icon stat-icon-primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            </div>
                         </div>
                         <div class="stat-card">
-                            <h3>Total Classes</h3>
-                            <div class="stat-value" id="overall-total">0</div>
+                            <div class="stat-card-inner">
+                                <div class="stat-label">Total Classes</div>
+                                <div class="stat-value" id="overall-total">0</div>
+                            </div>
+                            <div class="stat-icon stat-icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </div>
                         </div>
                         <div class="stat-card">
-                            <h3>Classes Attended</h3>
-                            <div class="stat-value" id="overall-attended">0</div>
+                            <div class="stat-card-inner">
+                                <div class="stat-label">Classes Attended</div>
+                                <div class="stat-value" id="overall-attended">0</div>
+                            </div>
+                            <div class="stat-icon stat-icon-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="section-title-bar">
-                        <h3>Subjects Breakdown</h3>
-                        <span class="section-tag-pill">All Courses</span>
-                    </div>
-
-                    <div class="subjects-grid" id="subjects-grid" style="margin-bottom: 2rem;">
-                        <!-- Subject cards will be injected here via JS -->
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Subjects Breakdown</h3>
+                            <span class="panel-badge">All Courses</span>
+                        </div>
+                        <div class="subjects-grid" id="subjects-grid">
+                            <!-- Subject cards will be injected here via JS -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- Page 2: Timetable & Schedules -->
                 <div id="page-timetable" class="dashboard-page hidden">
-                    <header class="dashboard-header">
-                        <div>
-                            <h2>Class Timetable</h2>
-                            <p class="subtitle">Daily class tracker and weekly semester timetable.</p>
-                        </div>
-                    </header>
 
-                    <div id="timetable-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
-                        <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+                    <div class="panel" id="timetable-section">
+                        <div class="panel-header">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <h3 id="timetable-title" style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Today's Classes</h3>
-                                <button id="edit-timetable-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; margin: 0; display: none;">Edit Labs</button>
+                                <h3 class="panel-title" id="timetable-title">Today's Classes</h3>
+                                <button id="edit-timetable-btn" class="btn-sm" style="display: none;">Edit Labs</button>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span id="timetable-relative-badge" class="timetable-day-badge">Today</span>
-                                <span id="current-day" style="color: var(--primary); font-weight: 600;">Monday</span>
+                                <span id="timetable-relative-badge" class="badge badge-accent">Today</span>
+                                <span id="current-day" class="panel-meta">Monday</span>
                             </div>
                         </div>
 
-                        <!-- Horizontal Week Bar (Today leftmost to exactly 1 week later) -->
+                        <!-- Horizontal Week Bar -->
                         <div id="timetable-nav-bar" class="timetable-week-bar" style="display: none;">
                             <button id="tt-prev-btn" class="tt-arrow-btn" type="button" title="Previous Day" disabled>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                             </button>
                             <div id="timetable-days-track" class="timetable-days-track">
-                                <!-- 8 Day pills dynamically populated: Day 0 (Today) through Day 7 (1 week later) -->
+                                <!-- 8 Day pills dynamically populated -->
                             </div>
                             <button id="tt-next-btn" class="tt-arrow-btn" type="button" title="Next Day">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -220,49 +250,45 @@
                         </div>
 
                         <div id="timetable-content">
-                            <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
+                            <div class="loading-timetable" style="text-align: center; color: var(--text-muted); padding: 2rem;">Checking cloud database...</div>
                         </div>
                     </div>
 
-                    <div id="full-week-section" class="timetable-card glass-panel hidden" style="padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto;">
-                        <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
-                            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Weekly Schedule</h3>
-                            <button id="share-timetable-btn" class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem; margin: 0; display: none; border-color: var(--primary); color: var(--text-main); align-items: center; gap: 6px; cursor: pointer;">
+                    <div id="full-week-section" class="panel hidden">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Weekly Schedule</h3>
+                            <button id="share-timetable-btn" class="btn-sm btn-accent" style="display: none;">
                                 Share Schedule 🔗
                             </button>
                         </div>
-                        <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
-                            <!-- Table injected by JS -->
-                        </table>
+                        <div style="overflow-x: auto;">
+                            <table id="full-week-table" class="data-table">
+                                <!-- Table injected by JS -->
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Page 3: Bunk Planner -->
                 <div id="page-planner" class="dashboard-page hidden">
-                    <header class="dashboard-header">
-                        <div>
-                            <h2>Bunk Planner &amp; Simulator</h2>
-                            <p class="subtitle">Simulate upcoming absences and test how leaves impact your attendance.</p>
+                    <div class="panel" id="bunk-planner-section">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Leave Damage Calculator</h3>
+                            <span class="panel-badge">Simulator</span>
                         </div>
-                    </header>
-
-                    <div id="bunk-planner-section" class="timetable-card glass-panel" style="padding: 1.8rem; margin-bottom: 2rem;">
-                        <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                            <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Leave Damage Calculator</h3>
-                        </div>
-                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Select a date range you plan to take leave. We'll cross-reference your timetable and simulate the exact percentage drop for each course.</p>
+                        <p class="panel-desc">Select a date range you plan to take leave. We'll cross-reference your timetable and simulate the exact percentage drop for each course.</p>
                         
-                        <div class="planner-dates-row" style="display: flex; gap: 14px; margin-bottom: 1.2rem;">
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">From Date</label>
-                                <input type="date" id="bunk-start-date" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(15, 23, 42, 0.8); color: white; border: 1px solid var(--glass-border);">
+                        <div class="planner-dates-row">
+                            <div class="planner-date-field">
+                                <label>From Date</label>
+                                <input type="date" id="bunk-start-date">
                             </div>
-                            <div style="flex: 1;">
-                                <label style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">To Date</label>
-                                <input type="date" id="bunk-end-date" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(15, 23, 42, 0.8); color: white; border: 1px solid var(--glass-border);">
+                            <div class="planner-date-field">
+                                <label>To Date</label>
+                                <input type="date" id="bunk-end-date">
                             </div>
                         </div>
-                        <button id="calculate-bunk-btn" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600; cursor: pointer;">Simulate Absences</button>
+                        <button id="calculate-bunk-btn" class="btn-primary" style="width: 100%; margin-top: 0;">Simulate Absences</button>
                         
                         <div id="bunk-simulation-results" style="margin-top: 1.5rem; display: none;">
                             <!-- Results injected here -->
@@ -270,33 +296,31 @@
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </main>
+    </section>
 
     <!-- Timetable Builder Modal -->
     <div id="timetable-modal" class="modal-overlay hidden">
-        <div class="modal-content glass-panel" style="padding: 2rem;">
-            <h2 style="margin-bottom: 5px;">Build Class Timetable</h2>
-            <p class="subtitle" style="margin-bottom: 1.5rem;">Set up the weekly schedule for everyone in your batch.</p>
+        <div class="modal-content">
+            <h2 style="margin-bottom: 5px; font-size: 1.25rem;">Build Class Timetable</h2>
+            <p class="panel-desc" style="margin-bottom: 1.5rem;">Set up the weekly schedule for everyone in your batch.</p>
             
-            <div style="background: rgba(204,255,0,0.1); border: 1px solid rgba(204,255,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center;">
-                <p style="color: var(--primary); font-weight: 600; margin-bottom: 10px;">Magic AI Import</p>
+            <div class="ai-import-box">
+                <p class="ai-import-title">Magic AI Import</p>
                 <input type="file" id="ai-timetable-upload" accept="image/*" style="display: none;">
-                <button id="ai-upload-btn" class="btn-secondary" style="margin-top: 0; border-color: var(--primary); color: var(--text-main);">Upload Timetable Photo</button>
+                <button id="ai-upload-btn" class="btn-sm btn-accent">Upload Timetable Photo</button>
             </div>
 
-            <div id="timetable-builder" style="display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding-right: 10px;">
+            <div id="timetable-builder" class="timetable-builder-scroll">
                 <!-- Builder UI injected by JS -->
             </div>
             <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-                <button id="cancel-timetable" class="btn-secondary" style="margin-top: 0; padding: 0.8rem; flex: 1;">Cancel</button>
-                <button id="save-local-timetable" class="btn-primary" style="margin-top: 0; padding: 0.8rem; flex: 1;">Save (Just me)</button>
-                <button id="save-timetable" class="btn-secondary" style="margin-top: 0; padding: 0.8rem; font-size: 0.85rem; flex: 1; border-color: var(--primary);">Publish to Cloud</button>
+                <button id="cancel-timetable" class="btn-secondary" style="flex: 1;">Cancel</button>
+                <button id="save-local-timetable" class="btn-primary" style="flex: 1; margin-top: 0;">Save (Just me)</button>
+                <button id="save-timetable" class="btn-sm btn-accent" style="flex: 1; padding: 0.7rem;">Publish to Cloud</button>
             </div>
         </div>
     </div>
-
-    <!-- Empty replacement for removed modal -->
 
     <script src="app.js"></script>
     <script>
