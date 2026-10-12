@@ -503,3 +503,87 @@ button {
     background: rgba(255,255,255,0.05);
     font-weight: 600;
 }
+
+/* Timetable Day Navigator */
+.timetable-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    background: rgba(15, 23, 42, 0.45);
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.timetable-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tt-nav-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.tt-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tt-nav-btn:active {
+    transform: translateY(0);
+}
+
+.tt-nav-btn.active {
+    background: rgba(204, 255, 0, 0.15);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba(204, 255, 0, 0.2);
+}
+
+.tt-back-today-btn {
+    background: rgba(204, 255, 0, 0.12);
+    border-color: rgba(204, 255, 0, 0.4);
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.tt-back-today-btn:hover {
+    background: var(--primary);
+    color: #09090b;
+    border-color: var(--primary);
+    box-shadow: 0 0 16px rgba(204, 255, 0, 0.35);
+}
+
+.timetable-day-badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(204, 255, 0, 0.12);
+    color: var(--primary);
+    font-weight: 600;
+    border: 1px solid rgba(204, 255, 0, 0.25);
+    letter-spacing: 0.02em;
+}
+

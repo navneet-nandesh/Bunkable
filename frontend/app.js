@@ -247,6 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('overall-percentage').style.color = getPercentageColor(overallPercentage, targetPercent);
         document.getElementById('overall-total').textContent = overallTotal;
         document.getElementById('overall-attended').textContent = overallAttended;
+
+        if (window.currentTimetable) {
+            renderDayTimetable(window.currentTimetable, currentDayOffset);
+        }
     }
 
     function getStatusIcon(status) {
@@ -260,15 +264,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Timetable Logic ---
+    let currentDayOffset = 0;
+
     async function fetchTimetable(bid) {
         document.getElementById('edit-timetable-btn').style.display = 'block';
-        document.getElementById('share-timetable-btn').style.display = 'block';
+        const shareBtn = document.getElementById('share-timetable-btn');
+        if (shareBtn) shareBtn.style.display = 'inline-flex';
         
         // 1. Check for personal local override
         const localTT = localStorage.getItem('bunkable_timetable');
         if (localTT) {
             window.currentTimetable = JSON.parse(localTT);
-            renderTodayTimetable(window.currentTimetable);
+            const navBar = document.getElementById('timetable-nav-bar');
+            if (navBar) navBar.style.display = 'flex';
+            renderDayTimetable(window.currentTimetable, currentDayOffset);
             return;
         }
 
@@ -280,7 +289,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success && data.timetable) {
                 window.currentTimetable = data.timetable;
-                renderTodayTimetable(data.timetable);
+                const navBar = document.getElementById('timetable-nav-bar');
+                if (navBar) navBar.style.display = 'flex';
+                renderDayTimetable(data.timetable, currentDayOffset);
             } else {
                 showTimetableMissing();
             }
@@ -290,32 +301,96 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderTodayTimetable(timetable) {
-        if(typeof renderFullWeek === 'function') renderFullWeek(timetable);
+        renderDayTimetable(timetable, currentDayOffset);
+    }
+
+    function renderDayTimetable(timetable, offset = 0) {
+        currentDayOffset = offset;
+        if (!timetable) return;
+        if (typeof renderFullWeek === 'function') renderFullWeek(timetable);
+
+        const navBar = document.getElementById('timetable-nav-bar');
+        if (navBar) navBar.style.display = 'flex';
+
         const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const todayIdx = new Date().getDay();
-        const todayStr = days[todayIdx];
-        document.getElementById('current-day').innerText = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
-        
-        if (todayIdx === 0 || todayIdx === 6) {
-            document.getElementById('timetable-content').innerHTML = `<p style="text-align:center; color: var(--text-muted); margin-top: 10px;">It's the weekend! No classes today. 🎉</p>`;
-            return;
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + offset);
+
+        const targetDayIdx = targetDate.getDay();
+        const targetDayStr = days[targetDayIdx];
+        const dayFormatted = targetDayStr.charAt(0).toUpperCase() + targetDayStr.slice(1);
+        const dateFormatted = targetDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+        const titleEl = document.getElementById('timetable-title');
+        const badgeEl = document.getElementById('timetable-relative-badge');
+        const dayEl = document.getElementById('current-day');
+        const backTodayBtn = document.getElementById('tt-btn-back-today');
+        const todayBtn = document.getElementById('tt-btn-today');
+        const tomorrowBtn = document.getElementById('tt-btn-tomorrow');
+
+        // Update nav buttons active states
+        if (todayBtn) todayBtn.classList.toggle('active', offset === 0);
+        if (tomorrowBtn) tomorrowBtn.classList.toggle('active', offset === 1);
+
+        if (offset === 0) {
+            if (titleEl) titleEl.innerText = "Today's Classes";
+            if (badgeEl) badgeEl.innerText = "Today";
+            if (backTodayBtn) backTodayBtn.style.display = 'none';
+        } else if (offset === 1) {
+            if (titleEl) titleEl.innerText = "Tomorrow's Classes";
+            if (badgeEl) badgeEl.innerText = "Tomorrow";
+            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
+        } else if (offset === -1) {
+            if (titleEl) titleEl.innerText = "Yesterday's Classes";
+            if (badgeEl) badgeEl.innerText = "Yesterday";
+            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
+        } else if (offset > 1) {
+            if (titleEl) titleEl.innerText = `${dayFormatted}'s Classes`;
+            if (badgeEl) badgeEl.innerText = `+${offset} days`;
+            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
+        } else {
+            if (titleEl) titleEl.innerText = `${dayFormatted}'s Classes`;
+            if (badgeEl) badgeEl.innerText = `${Math.abs(offset)} days ago`;
+            if (backTodayBtn) backTodayBtn.style.display = 'inline-flex';
         }
 
-        const todayClasses = timetable[todayStr] || [];
-        if (todayClasses.length === 0) {
-            document.getElementById('timetable-content').innerHTML = `<p style="text-align:center; color: var(--text-muted);">No classes scheduled for today.</p>`;
+        if (dayEl) dayEl.innerText = `${dayFormatted}, ${dateFormatted}`;
+
+        const dayClasses = timetable[targetDayStr] || [];
+        const hasValidClasses = dayClasses.some(cls => cls && cls !== 'FREE');
+
+        if (!hasValidClasses) {
+            if (targetDayIdx === 0 || targetDayIdx === 6) {
+                const weekendMsg = offset === 0 
+                    ? "It's the weekend! No classes today. 🎉"
+                    : offset === 1 
+                        ? "Tomorrow is the weekend! No classes scheduled. 🎉"
+                        : `Weekend! No classes scheduled for ${dayFormatted}. 🎉`;
+                document.getElementById('timetable-content').innerHTML = `
+                    <div style="text-align:center; padding: 25px 15px; color: var(--text-muted);">
+                        <p style="font-size: 1.1rem; margin-bottom: 6px;">🎉 Weekend</p>
+                        <p style="font-size: 0.9rem;">${weekendMsg}</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('timetable-content').innerHTML = `
+                    <div style="text-align:center; padding: 25px 15px; color: var(--text-muted);">
+                        <p style="font-size: 1rem;">No classes scheduled for ${dayFormatted}. Enjoy your free day! ✨</p>
+                    </div>
+                `;
+            }
             return;
         }
 
         const classCounts = {};
-        todayClasses.forEach(cls => {
+        dayClasses.forEach(cls => {
             if (cls && cls !== 'FREE') {
                 classCounts[cls] = (classCounts[cls] || 0) + 1;
             }
         });
 
         let html = '';
-        todayClasses.forEach((cls, i) => {
+        dayClasses.forEach((cls, i) => {
             if (!cls || cls === 'FREE') return;
             const subj = subjectsData.find(s => s.name === cls);
             let color = 'var(--text-main)';
@@ -354,6 +429,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showTimetableMissing() {
+        const navBar = document.getElementById('timetable-nav-bar');
+        if (navBar) navBar.style.display = 'none';
         document.getElementById('timetable-content').innerHTML = `
             <div style="text-align:center; padding: 10px;">
                 <p style="margin-bottom:15px; color:var(--text-muted); font-size: 0.95rem;">No cloud timetable exists for your batch yet.</p>
@@ -361,6 +438,44 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         document.getElementById('setup-timetable-btn').addEventListener('click', openTimetableBuilder);
+    }
+
+    // Day navigation event listeners
+    const ttBtnToday = document.getElementById('tt-btn-today');
+    const ttBtnTomorrow = document.getElementById('tt-btn-tomorrow');
+    const ttBtnNext = document.getElementById('tt-btn-next');
+    const ttBtnPrev = document.getElementById('tt-btn-prev');
+    const ttBtnBackToday = document.getElementById('tt-btn-back-today');
+
+    if (ttBtnToday) {
+        ttBtnToday.addEventListener('click', () => {
+            if (!window.currentTimetable) return;
+            renderDayTimetable(window.currentTimetable, 0);
+        });
+    }
+    if (ttBtnTomorrow) {
+        ttBtnTomorrow.addEventListener('click', () => {
+            if (!window.currentTimetable) return;
+            renderDayTimetable(window.currentTimetable, 1);
+        });
+    }
+    if (ttBtnNext) {
+        ttBtnNext.addEventListener('click', () => {
+            if (!window.currentTimetable) return;
+            renderDayTimetable(window.currentTimetable, currentDayOffset + 1);
+        });
+    }
+    if (ttBtnPrev) {
+        ttBtnPrev.addEventListener('click', () => {
+            if (!window.currentTimetable) return;
+            renderDayTimetable(window.currentTimetable, currentDayOffset - 1);
+        });
+    }
+    if (ttBtnBackToday) {
+        ttBtnBackToday.addEventListener('click', () => {
+            if (!window.currentTimetable) return;
+            renderDayTimetable(window.currentTimetable, 0);
+        });
     }
 
     document.getElementById('edit-timetable-btn').addEventListener('click', openTimetableBuilder);
@@ -465,9 +580,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         navigator.clipboard.writeText(shareUrl).then(() => {
             const btn = document.getElementById('share-timetable-btn');
-            const originalText = btn.innerText;
-            btn.innerText = 'Copied! ✅';
-            setTimeout(() => { btn.innerText = originalText; }, 2000);
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = 'Link Copied! ✅';
+            setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
         }).catch(err => {
             alert('Failed to copy link. Check console for URL.');
             console.log('Share URL:', shareUrl);
@@ -525,8 +640,13 @@ document.addEventListener('DOMContentLoaded', () => {
         html += '</tr></thead><tbody>';
         
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+        const dayIndices = { 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5 };
+        const currentTodayIdx = new Date().getDay();
+
         days.forEach(day => {
-            html += `<tr><td style="font-weight:bold; color:var(--primary); text-transform:capitalize;">${day.substr(0,3)}</td>`;
+            const targetIdx = dayIndices[day];
+            const offsetDiff = targetIdx - currentTodayIdx;
+            html += `<tr><td class="clickable-week-day" data-offset="${offsetDiff}" style="font-weight:bold; color:var(--primary); text-transform:capitalize; cursor:pointer;" title="Click to view ${day}'s classes">${day.substr(0,3)}</td>`;
             for(let i=0; i<8; i++) {
                 const subj = (tt[day] && tt[day][i]) ? tt[day][i] : 'FREE';
                 const isFree = subj === 'FREE';
@@ -548,6 +668,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.getElementById('full-week-table').innerHTML = html;
         document.getElementById('full-week-section').classList.remove('hidden');
+        const shareBtn = document.getElementById('share-timetable-btn');
+        if (shareBtn) shareBtn.style.display = 'inline-flex';
+
+        // Add click events to week table days
+        document.querySelectorAll('.clickable-week-day').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const offset = parseInt(e.currentTarget.dataset.offset, 10);
+                if (!isNaN(offset) && window.currentTimetable) {
+                    renderDayTimetable(window.currentTimetable, offset);
+                    document.getElementById('timetable-section').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
     };
 
     // --- Bunk Planner Logic ---

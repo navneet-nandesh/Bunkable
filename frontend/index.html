@@ -91,14 +91,38 @@
             </div>
 
             <div id="timetable-section" class="timetable-card glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
-                <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Today's Classes</h3>
+                        <h3 id="timetable-title" style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Today's Classes</h3>
                         <button id="edit-timetable-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; margin: 0; display: none;">Edit Labs</button>
-                        <button id="share-timetable-btn" class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; margin: 0; display: none; border-color: var(--primary); color: var(--text-main);">Share 🔗</button>
                     </div>
-                    <span id="current-day" style="color: var(--primary); font-weight: 600;">Monday</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="timetable-relative-badge" class="timetable-day-badge">Today</span>
+                        <span id="current-day" style="color: var(--primary); font-weight: 600;">Monday</span>
+                    </div>
                 </div>
+
+                <!-- Day Navigation Controls -->
+                <div id="timetable-nav-bar" class="timetable-nav-bar" style="display: none;">
+                    <div class="timetable-nav-group">
+                        <button id="tt-btn-today" class="tt-nav-btn active" type="button" title="View Today's Classes">
+                            <span>📅</span> Today
+                        </button>
+                        <button id="tt-btn-tomorrow" class="tt-nav-btn" type="button" title="View Tomorrow's Classes">
+                            <span>☀️</span> Tomorrow
+                        </button>
+                        <button id="tt-btn-next" class="tt-nav-btn" type="button" title="View Next Day's Classes">
+                            Next Day <span>▶</span>
+                        </button>
+                        <button id="tt-btn-prev" class="tt-nav-btn" type="button" title="View Previous Day's Classes">
+                            <span>◀</span> Prev
+                        </button>
+                    </div>
+                    <button id="tt-btn-back-today" class="tt-nav-btn tt-back-today-btn" type="button" style="display: none;" title="Return to Today's Classes">
+                        <span>↩</span> Back to Today
+                    </button>
+                </div>
+
                 <div id="timetable-content">
                     <div class="loading-timetable" style="text-align: center; color: var(--text-muted);">Checking cloud database...</div>
                 </div>
@@ -111,8 +135,11 @@
             </div>
 
             <div id="full-week-section" class="timetable-card glass-panel hidden" style="padding: 1.5rem; margin-bottom: 2rem; overflow-x: auto;">
-                <div class="timetable-header" style="margin-bottom: 1rem;">
+                <div class="timetable-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
                     <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">Weekly Schedule</h3>
+                    <button id="share-timetable-btn" class="btn-secondary" style="padding: 6px 14px; font-size: 0.8rem; margin: 0; display: none; border-color: var(--primary); color: var(--text-main); align-items: center; gap: 6px; cursor: pointer;">
+                        Share Schedule 🔗
+                    </button>
                 </div>
                 <table id="full-week-table" style="width: 100%; border-collapse: collapse; text-align: center; color: white;">
                     <!-- Table injected by JS -->
