@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bunkable-v19'; // Bumped version for cloud backup & downtime fallback!
+const CACHE_NAME = 'bunkable-v20'; // Bumped version for navigation bar & multi-page UI!
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

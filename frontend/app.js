@@ -47,6 +47,51 @@ document.addEventListener('DOMContentLoaded', () => {
     targetInput.addEventListener('input', updateDashboard);
     logoutBtn.addEventListener('click', handleLogout);
 
+    // --- Multi-Page Navigation Logic ---
+    function switchPage(pageName) {
+        const pages = document.querySelectorAll('.dashboard-page');
+        pages.forEach(p => {
+            if (p.id === `page-${pageName}`) {
+                p.classList.remove('hidden');
+                p.classList.add('active');
+            } else {
+                p.classList.remove('active');
+                p.classList.add('hidden');
+            }
+        });
+
+        // Sync Desktop Top Navigation Tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            if (tab.dataset.page === pageName) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+        });
+
+        // Sync Mobile Bottom Navigation Items
+        document.querySelectorAll('.mobile-nav-item').forEach(item => {
+            if (item.dataset.page === pageName) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Scroll gracefully to top of page content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Attach click events for both desktop top nav and mobile bottom dock
+    document.querySelectorAll('.nav-tab, .mobile-nav-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const pageName = e.currentTarget.dataset.page;
+            if (pageName) {
+                switchPage(pageName);
+            }
+        });
+    });
+
     // Auto-login logic
     const savedUser = localStorage.getItem('bunkable_user');
     const savedPass = localStorage.getItem('bunkable_pass');
@@ -155,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // small delay to allow display:block to apply before animation
                 setTimeout(() => {
                     dashboardSection.classList.add('active');
+                    switchPage('attendance');
                     updateDashboard();
                 }, 50);
                 
@@ -181,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('bunkable_user');
         localStorage.removeItem('bunkable_pass');
         if (offlineBackupBanner) offlineBackupBanner.classList.add('hidden');
+        switchPage('attendance');
 
         dashboardSection.classList.remove('active');
         setTimeout(() => {
@@ -755,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.addEventListener('click', (e) => {
                 const offset = parseInt(e.currentTarget.dataset.offset, 10);
                 if (!isNaN(offset) && window.currentTimetable) {
+                    switchPage('timetable');
                     renderDayTimetable(window.currentTimetable, offset);
                     document.getElementById('timetable-section').scrollIntoView({ behavior: 'smooth' });
                 }
